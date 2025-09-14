@@ -7,6 +7,7 @@ import com.ahumadamob.fnanz.dto.response.UsuarioResponseDto;
 import com.ahumadamob.fnanz.entity.Usuario;
 import com.ahumadamob.fnanz.repository.UsuarioRepository;
 import com.ahumadamob.fnanz.service.UsuarioService;
+import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -69,13 +70,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponseDto get(Long id) {
         return toDto(usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                .orElseThrow(ResourceNotFoundException::new));
     }
 
     @Override
     public UsuarioResponseDto update(Long id, UsuarioPatchDto dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(ResourceNotFoundException::new);
         Optional.ofNullable(dto.getNombre()).ifPresent(usuario::setNombre);
         Optional.ofNullable(dto.getMonedaBase()).ifPresent(usuario::setMonedaBase);
         Optional.ofNullable(dto.getZonaHoraria()).ifPresent(usuario::setZonaHoraria);
@@ -87,7 +88,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void delete(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(ResourceNotFoundException::new);
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
     }
@@ -95,7 +96,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void restore(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(ResourceNotFoundException::new);
         usuario.setActivo(true);
         usuarioRepository.save(usuario);
     }
@@ -103,7 +104,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void changePassword(Long id, UsuarioPasswordDto dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(ResourceNotFoundException::new);
         if (!passwordEncoder.matches(dto.getActual(), usuario.getPasswordHash())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid password");
         }
