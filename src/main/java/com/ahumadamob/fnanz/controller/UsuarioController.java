@@ -9,9 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
 import java.util.List;
 
 import static com.ahumadamob.fnanz.controller.ResponseFactory.*;
@@ -31,12 +28,8 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<ApiResponseSuccessDto<UsuarioDto>> create(@Validated @RequestBody UsuarioCreateDto dto) {
-        UsuarioDto created = usuarioService.create(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(created.getId())
-                .toUri();
-        return created(location, created);
+        UsuarioDto createdUser = usuarioService.create(dto);
+        return created(createdUser.getId(), createdUser);
     }
 
     @GetMapping

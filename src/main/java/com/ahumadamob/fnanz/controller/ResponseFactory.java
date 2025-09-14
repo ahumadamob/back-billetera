@@ -30,9 +30,19 @@ public final class ResponseFactory {
     }
 
     /**
-     * Crea una respuesta con estado 201 y encabezado Location.
+     * Crea una respuesta con estado 201 y encabezado Location generado
+     * a partir del identificador del recurso recién creado.
+     *
+     * @param id   identificador del recurso creado
+     * @param data cuerpo de la respuesta
+     * @param <T>  tipo del cuerpo de respuesta
+     * @return respuesta con estado 201 y encabezado Location
      */
-    public static <T> ResponseEntity<ApiResponseSuccessDto<T>> created(URI location, T data) {
+    public static <T> ResponseEntity<ApiResponseSuccessDto<T>> created(Object id, T data) {
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(id)
+                .toUri();
         return ResponseEntity.created(location).body(ok(data));
     }
 
