@@ -24,7 +24,15 @@ public final class ResponseFactory {
      * Crea una respuesta de éxito simple con estado 200.
      */
     public static <T> ApiResponseSuccessDto<T> ok(T data) {
+        return ok(null, data);
+    }
+
+    /**
+     * Crea una respuesta de éxito con mensaje personalizado.
+     */
+    public static <T> ApiResponseSuccessDto<T> ok(String message, T data) {
         return ApiResponseSuccessDto.<T>builder()
+                .message(message)
                 .data(data)
                 .build();
     }
@@ -38,12 +46,16 @@ public final class ResponseFactory {
      * @param <T>  tipo del cuerpo de respuesta
      * @return respuesta con estado 201 y encabezado Location
      */
-    public static <T> ResponseEntity<ApiResponseSuccessDto<T>> created(Object id, T data) {
+    public static <T> ResponseEntity<ApiResponseSuccessDto<T>> created(Object id, String message, T data) {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(id)
                 .toUri();
-        return ResponseEntity.created(location).body(ok(data));
+        return ResponseEntity.created(location).body(ok(message, data));
+    }
+
+    public static <T> ResponseEntity<ApiResponseSuccessDto<T>> created(Object id, T data) {
+        return created(id, null, data);
     }
 
     /**

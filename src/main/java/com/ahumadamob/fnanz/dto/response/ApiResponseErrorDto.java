@@ -39,7 +39,7 @@ public class ApiResponseErrorDto {
     @AllArgsConstructor
     public static class Message {
         private String field;
-        private String value;
+        private String message;
     }
 }
 

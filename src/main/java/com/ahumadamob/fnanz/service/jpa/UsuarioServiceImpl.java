@@ -1,6 +1,7 @@
 package com.ahumadamob.fnanz.service.jpa;
 
 import com.ahumadamob.fnanz.entity.Usuario;
+import com.ahumadamob.fnanz.error.ResourceConflictException;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import com.ahumadamob.fnanz.repository.UsuarioRepository;
 import com.ahumadamob.fnanz.service.UsuarioService;
@@ -31,10 +32,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario create(Usuario usuario) {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso");
+            throw new ResourceConflictException("email", "El email ya está en uso");
         }
         if (usuarioRepository.findByNombre(usuario.getNombre()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre ya está en uso");
+            throw new ResourceConflictException("nombre", "El nombre ya está en uso");
         }
         return usuarioRepository.save(usuario);
     }
@@ -66,7 +67,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(ResourceNotFoundException::new);
         if (cambios.getNombre() != null && !cambios.getNombre().equals(usuario.getNombre())) {
             if (usuarioRepository.findByNombre(cambios.getNombre()).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre ya está en uso");
+                throw new ResourceConflictException("nombre", "El nombre ya está en uso");
             }
             usuario.setNombre(cambios.getNombre());
         }

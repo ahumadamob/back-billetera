@@ -38,7 +38,7 @@ public class UsuarioController {
         Usuario usuario = usuarioMapper.toEntity(dto);
         Usuario created = usuarioService.create(usuario);
         UsuarioResponseDto response = usuarioMapper.toDto(created);
-        return created(response.getId(), response);
+        return created(response.getId(), "Usuario creado correctamente", response);
     }
 
     @GetMapping
