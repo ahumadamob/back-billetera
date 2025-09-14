@@ -20,8 +20,6 @@ public class UsuarioResponseDto {
     private String nombre;
     private String email;
     private Moneda monedaBase;
-    private String zonaHoraria;
-    private Boolean activo;
     private LocalDateTime creadoEn;
     private LocalDateTime actualizadoEn;
 }

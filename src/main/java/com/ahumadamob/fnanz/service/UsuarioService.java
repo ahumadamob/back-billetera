@@ -9,11 +9,10 @@ import org.springframework.data.domain.Pageable;
  */
 public interface UsuarioService {
     Usuario create(Usuario usuario);
-    Page<Usuario> list(String q, Boolean activo, Pageable pageable);
+    Page<Usuario> list(String q, Pageable pageable);
     Usuario get(Long id);
     Usuario update(Long id, Usuario usuario);
     void delete(Long id);
-    void restore(Long id);
     void changePassword(Long id, String actual, String nueva);
     Usuario me();
 }

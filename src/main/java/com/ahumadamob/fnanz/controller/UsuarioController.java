@@ -43,9 +43,8 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity<ApiResponseSuccessDto<List<UsuarioResponseDto>>> list(@RequestParam(required = false) String q,
-                                                                                @RequestParam(required = false) Boolean activo,
                                                                                 Pageable pageable) {
-        Page<Usuario> page = usuarioService.list(q, activo, pageable);
+        Page<Usuario> page = usuarioService.list(q, pageable);
         Page<UsuarioResponseDto> dtoPage = page.map(usuarioMapper::toDto);
         return page(dtoPage);
     }
@@ -67,12 +66,6 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         usuarioService.delete(id);
-    }
-
-    @PostMapping("/{id}/restore")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restore(@PathVariable Long id) {
-        usuarioService.restore(id);
     }
 
     @PostMapping("/{id}/password")

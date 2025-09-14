@@ -1,7 +1,6 @@
 package com.ahumadamob.fnanz.dto;
 
 import com.ahumadamob.fnanz.enums.Moneda;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +14,4 @@ import lombok.Setter;
 public class UsuarioPatchDto {
     private String nombre;
     private Moneda monedaBase;
-    private String zonaHoraria;
-    private Boolean activo;
 }

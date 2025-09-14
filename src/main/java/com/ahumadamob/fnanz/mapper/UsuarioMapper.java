@@ -26,14 +26,12 @@ public class UsuarioMapper {
         usuario.setNombre(dto.getNombre());
         usuario.setEmail(dto.getEmail());
         usuario.setMonedaBase(dto.getMonedaBase());
-        usuario.setZonaHoraria(dto.getZonaHoraria());
         usuario.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         return usuario;
     }
 
     public Usuario toPartialEntity(UsuarioPatchDto dto) {
         Usuario usuario = new Usuario();
-        usuario.setActivo(null);
         updateEntity(dto, usuario);
         return usuario;
     }
@@ -41,8 +39,6 @@ public class UsuarioMapper {
     public void updateEntity(UsuarioPatchDto dto, Usuario usuario) {
         Optional.ofNullable(dto.getNombre()).ifPresent(usuario::setNombre);
         Optional.ofNullable(dto.getMonedaBase()).ifPresent(usuario::setMonedaBase);
-        Optional.ofNullable(dto.getZonaHoraria()).ifPresent(usuario::setZonaHoraria);
-        Optional.ofNullable(dto.getActivo()).ifPresent(usuario::setActivo);
     }
 
     public UsuarioResponseDto toDto(Usuario usuario) {
@@ -51,8 +47,6 @@ public class UsuarioMapper {
                 usuario.getNombre(),
                 usuario.getEmail(),
                 usuario.getMonedaBase(),
-                usuario.getZonaHoraria(),
-                usuario.getActivo(),
                 usuario.getCreatedAt(),
                 usuario.getUpdatedAt()
         );

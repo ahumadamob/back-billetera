@@ -33,12 +33,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso");
         }
+        if (usuarioRepository.findByNombre(usuario.getNombre()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre ya está en uso");
+        }
         return usuarioRepository.save(usuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Usuario> list(String q, Boolean activo, Pageable pageable) {
+    public Page<Usuario> list(String q, Pageable pageable) {
         Specification<Usuario> spec = Specification.where(null);
         if (q != null && !q.isBlank()) {
             String like = "%" + q.toLowerCase() + "%";
@@ -46,9 +49,6 @@ public class UsuarioServiceImpl implements UsuarioService {
                 cb.like(cb.lower(root.get("nombre")), like),
                 cb.like(cb.lower(root.get("email")), like)
             ));
-        }
-        if (activo != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("activo"), activo));
         }
         return usuarioRepository.findAll(spec, pageable);
     }
@@ -64,35 +64,24 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario update(Long id, Usuario cambios) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
-        if (cambios.getNombre() != null) {
+        if (cambios.getNombre() != null && !cambios.getNombre().equals(usuario.getNombre())) {
+            if (usuarioRepository.findByNombre(cambios.getNombre()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre ya está en uso");
+            }
             usuario.setNombre(cambios.getNombre());
         }
         if (cambios.getMonedaBase() != null) {
             usuario.setMonedaBase(cambios.getMonedaBase());
-        }
-        if (cambios.getZonaHoraria() != null) {
-            usuario.setZonaHoraria(cambios.getZonaHoraria());
-        }
-        if (cambios.getActivo() != null) {
-            usuario.setActivo(cambios.getActivo());
         }
         return usuarioRepository.save(usuario);
     }
 
     @Override
     public void delete(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(ResourceNotFoundException::new);
-        usuario.setActivo(false);
-        usuarioRepository.save(usuario);
-    }
-
-    @Override
-    public void restore(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(ResourceNotFoundException::new);
-        usuario.setActivo(true);
-        usuarioRepository.save(usuario);
+        if (!usuarioRepository.existsById(id)) {
+            throw new ResourceNotFoundException();
+        }
+        usuarioRepository.deleteById(id);
     }
 
     @Override
