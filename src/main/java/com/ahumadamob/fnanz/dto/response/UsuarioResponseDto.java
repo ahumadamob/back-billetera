@@ -1,4 +1,4 @@
-package com.ahumadamob.fnanz.dto;
+package com.ahumadamob.fnanz.dto.response;
 
 import com.ahumadamob.fnanz.enums.Moneda;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioDto {
+public class UsuarioResponseDto {
     private Long id;
     private String nombre;
     private String email;

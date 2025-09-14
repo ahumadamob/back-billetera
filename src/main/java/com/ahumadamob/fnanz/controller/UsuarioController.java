@@ -1,7 +1,10 @@
 package com.ahumadamob.fnanz.controller;
 
-import com.ahumadamob.fnanz.dto.*;
+import com.ahumadamob.fnanz.dto.UsuarioCreateDto;
+import com.ahumadamob.fnanz.dto.UsuarioPasswordDto;
+import com.ahumadamob.fnanz.dto.UsuarioPatchDto;
 import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
+import com.ahumadamob.fnanz.dto.response.UsuarioResponseDto;
 import com.ahumadamob.fnanz.service.UsuarioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,26 +30,26 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponseSuccessDto<UsuarioDto>> create(@Validated @RequestBody UsuarioCreateDto dto) {
-        UsuarioDto createdUser = usuarioService.create(dto);
+    public ResponseEntity<ApiResponseSuccessDto<UsuarioResponseDto>> create(@Validated @RequestBody UsuarioCreateDto dto) {
+        UsuarioResponseDto createdUser = usuarioService.create(dto);
         return created(createdUser.getId(), createdUser);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponseSuccessDto<List<UsuarioDto>>> list(@RequestParam(required = false) String q,
-                                                                        @RequestParam(required = false) Boolean activo,
-                                                                        Pageable pageable) {
-        Page<UsuarioDto> page = usuarioService.list(q, activo, pageable);
+    public ResponseEntity<ApiResponseSuccessDto<List<UsuarioResponseDto>>> list(@RequestParam(required = false) String q,
+                                                                                @RequestParam(required = false) Boolean activo,
+                                                                                Pageable pageable) {
+        Page<UsuarioResponseDto> page = usuarioService.list(q, activo, pageable);
         return page(page);
     }
 
     @GetMapping("/{id}")
-    public ApiResponseSuccessDto<UsuarioDto> get(@PathVariable Long id) {
+    public ApiResponseSuccessDto<UsuarioResponseDto> get(@PathVariable Long id) {
         return ok(usuarioService.get(id));
     }
 
     @PatchMapping("/{id}")
-    public ApiResponseSuccessDto<UsuarioDto> update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
+    public ApiResponseSuccessDto<UsuarioResponseDto> update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
         return ok(usuarioService.update(id, dto));
     }
 
@@ -69,7 +72,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/me")
-    public ApiResponseSuccessDto<UsuarioDto> me() {
+    public ApiResponseSuccessDto<UsuarioResponseDto> me() {
         return ok(usuarioService.me());
     }
 }

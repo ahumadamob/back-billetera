@@ -1,6 +1,9 @@
 package com.ahumadamob.fnanz.service.jpa;
 
-import com.ahumadamob.fnanz.dto.*;
+import com.ahumadamob.fnanz.dto.UsuarioCreateDto;
+import com.ahumadamob.fnanz.dto.UsuarioPatchDto;
+import com.ahumadamob.fnanz.dto.UsuarioPasswordDto;
+import com.ahumadamob.fnanz.dto.response.UsuarioResponseDto;
 import com.ahumadamob.fnanz.entity.Usuario;
 import com.ahumadamob.fnanz.repository.UsuarioRepository;
 import com.ahumadamob.fnanz.service.UsuarioService;
@@ -31,7 +34,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioDto create(UsuarioCreateDto dto) {
+    public UsuarioResponseDto create(UsuarioCreateDto dto) {
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "email in use");
         }
@@ -47,7 +50,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UsuarioDto> list(String q, Boolean activo, Pageable pageable) {
+    public Page<UsuarioResponseDto> list(String q, Boolean activo, Pageable pageable) {
         Specification<Usuario> spec = Specification.where(null);
         if (q != null && !q.isBlank()) {
             String like = "%" + q.toLowerCase() + "%";
@@ -64,13 +67,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioDto get(Long id) {
+    public UsuarioResponseDto get(Long id) {
         return toDto(usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     @Override
-    public UsuarioDto update(Long id, UsuarioPatchDto dto) {
+    public UsuarioResponseDto update(Long id, UsuarioPatchDto dto) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Optional.ofNullable(dto.getNombre()).ifPresent(usuario::setNombre);
@@ -110,12 +113,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioDto me() {
+    public UsuarioResponseDto me() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    private UsuarioDto toDto(Usuario usuario) {
-        return new UsuarioDto(
+    private UsuarioResponseDto toDto(Usuario usuario) {
+        return new UsuarioResponseDto(
                 usuario.getId(),
                 usuario.getNombre(),
                 usuario.getEmail(),
