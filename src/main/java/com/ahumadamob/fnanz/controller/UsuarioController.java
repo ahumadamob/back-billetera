@@ -5,17 +5,16 @@ import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
 import com.ahumadamob.fnanz.service.UsuarioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.ahumadamob.fnanz.controller.ResponseFactory.*;
 
 /**
  * Controlador REST para la gestión de usuarios.
@@ -37,10 +36,7 @@ public class UsuarioController {
                 .path("/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
-        ApiResponseSuccessDto<UsuarioDto> body = ApiResponseSuccessDto.<UsuarioDto>builder()
-                .data(created)
-                .build();
-        return ResponseEntity.created(location).body(body);
+        return created(location, created);
     }
 
     @GetMapping
@@ -48,32 +44,17 @@ public class UsuarioController {
                                                                         @RequestParam(required = false) Boolean activo,
                                                                         Pageable pageable) {
         Page<UsuarioDto> page = usuarioService.list(q, activo, pageable);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
-        String link = createLinkHeader(page);
-        if (!link.isEmpty()) {
-            headers.add(HttpHeaders.LINK, link);
-        }
-        ApiResponseSuccessDto<List<UsuarioDto>> body = ApiResponseSuccessDto.<List<UsuarioDto>>builder()
-                .data(page.getContent())
-                .build();
-        return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        return page(page);
     }
 
     @GetMapping("/{id}")
     public ApiResponseSuccessDto<UsuarioDto> get(@PathVariable Long id) {
-        UsuarioDto usuario = usuarioService.get(id);
-        return ApiResponseSuccessDto.<UsuarioDto>builder()
-                .data(usuario)
-                .build();
+        return ok(usuarioService.get(id));
     }
 
     @PatchMapping("/{id}")
     public ApiResponseSuccessDto<UsuarioDto> update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
-        UsuarioDto updated = usuarioService.update(id, dto);
-        return ApiResponseSuccessDto.<UsuarioDto>builder()
-                .data(updated)
-                .build();
+        return ok(usuarioService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
@@ -96,30 +77,6 @@ public class UsuarioController {
 
     @GetMapping("/me")
     public ApiResponseSuccessDto<UsuarioDto> me() {
-        UsuarioDto dto = usuarioService.me();
-        return ApiResponseSuccessDto.<UsuarioDto>builder()
-                .data(dto)
-                .build();
-    }
-
-    private String createLinkHeader(Page<?> page) {
-        UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequest();
-        List<String> links = new ArrayList<>();
-        if (page.hasPrevious()) {
-            links.add(buildLink(builder, page.getNumber() - 1, page.getSize(), "prev"));
-            links.add(buildLink(builder, 0, page.getSize(), "first"));
-        }
-        if (page.hasNext()) {
-            links.add(buildLink(builder, page.getNumber() + 1, page.getSize(), "next"));
-            links.add(buildLink(builder, page.getTotalPages() - 1, page.getSize(), "last"));
-        }
-        return String.join(", ", links);
-    }
-
-    private String buildLink(UriComponentsBuilder builder, int page, int size, String rel) {
-        String uri = builder.replaceQueryParam("page", page)
-                .replaceQueryParam("size", size)
-                .toUriString();
-        return "<" + uri + ">; rel=\"" + rel + "\"";
+        return ok(usuarioService.me());
     }
 }
