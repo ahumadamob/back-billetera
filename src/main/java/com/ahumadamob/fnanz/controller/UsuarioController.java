@@ -1,6 +1,7 @@
 package com.ahumadamob.fnanz.controller;
 
 import com.ahumadamob.fnanz.dto.*;
+import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
 import com.ahumadamob.fnanz.service.UsuarioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,19 +31,22 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDto> create(@Validated @RequestBody UsuarioCreateDto dto) {
+    public ResponseEntity<ApiResponseSuccessDto<UsuarioDto>> create(@Validated @RequestBody UsuarioCreateDto dto) {
         UsuarioDto created = usuarioService.create(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
-        return ResponseEntity.created(location).body(created);
+        ApiResponseSuccessDto<UsuarioDto> body = ApiResponseSuccessDto.<UsuarioDto>builder()
+                .data(created)
+                .build();
+        return ResponseEntity.created(location).body(body);
     }
 
     @GetMapping
-    public ResponseEntity<List<UsuarioDto>> list(@RequestParam(required = false) String q,
-                                                 @RequestParam(required = false) Boolean activo,
-                                                 Pageable pageable) {
+    public ResponseEntity<ApiResponseSuccessDto<List<UsuarioDto>>> list(@RequestParam(required = false) String q,
+                                                                        @RequestParam(required = false) Boolean activo,
+                                                                        Pageable pageable) {
         Page<UsuarioDto> page = usuarioService.list(q, activo, pageable);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(page.getTotalElements()));
@@ -50,17 +54,26 @@ public class UsuarioController {
         if (!link.isEmpty()) {
             headers.add(HttpHeaders.LINK, link);
         }
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+        ApiResponseSuccessDto<List<UsuarioDto>> body = ApiResponseSuccessDto.<List<UsuarioDto>>builder()
+                .data(page.getContent())
+                .build();
+        return new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public UsuarioDto get(@PathVariable Long id) {
-        return usuarioService.get(id);
+    public ApiResponseSuccessDto<UsuarioDto> get(@PathVariable Long id) {
+        UsuarioDto usuario = usuarioService.get(id);
+        return ApiResponseSuccessDto.<UsuarioDto>builder()
+                .data(usuario)
+                .build();
     }
 
     @PatchMapping("/{id}")
-    public UsuarioDto update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
-        return usuarioService.update(id, dto);
+    public ApiResponseSuccessDto<UsuarioDto> update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
+        UsuarioDto updated = usuarioService.update(id, dto);
+        return ApiResponseSuccessDto.<UsuarioDto>builder()
+                .data(updated)
+                .build();
     }
 
     @DeleteMapping("/{id}")
@@ -82,8 +95,11 @@ public class UsuarioController {
     }
 
     @GetMapping("/me")
-    public UsuarioDto me() {
-        return usuarioService.me();
+    public ApiResponseSuccessDto<UsuarioDto> me() {
+        UsuarioDto dto = usuarioService.me();
+        return ApiResponseSuccessDto.<UsuarioDto>builder()
+                .data(dto)
+                .build();
     }
 
     private String createLinkHeader(Page<?> page) {
