@@ -42,7 +42,7 @@ public class Picture extends BaseEntity {
 
     @Column(name = "mime_type", nullable = false)
     @NotBlank
-    @Pattern(regexp = "^[\\w.+-]+/[\\w.+-]+$", message = "Formato MIME invalido")
+    @Pattern(regexp = "^[\\w.+-]+/[\\w.+-]+$", message = "Formato MIME inválido")
     private String mimeType;
 
     @Column(name = "size", nullable = false)

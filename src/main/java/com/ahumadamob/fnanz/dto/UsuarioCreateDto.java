@@ -16,19 +16,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UsuarioCreateDto {
 
-    @NotBlank
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El email debe ser válido")
     private String email;
 
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
     private Moneda monedaBase;
 
-    @NotBlank
+    @NotBlank(message = "La zona horaria es obligatoria")
     private String zonaHoraria;
 }

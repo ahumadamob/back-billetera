@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class UsuarioPasswordDto {
-    @NotBlank
+    @NotBlank(message = "La contraseña actual es obligatoria")
     private String actual;
 
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "La nueva contraseña es obligatoria")
+    @Size(min = 8, message = "La nueva contraseña debe tener al menos 8 caracteres")
     private String nueva;
 }

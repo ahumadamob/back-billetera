@@ -6,7 +6,7 @@ package com.ahumadamob.fnanz.error;
 public class ResourceNotFoundException extends RuntimeException {
 
     public ResourceNotFoundException() {
-        super("not found");
+        super("Recurso no encontrado");
     }
 }
 

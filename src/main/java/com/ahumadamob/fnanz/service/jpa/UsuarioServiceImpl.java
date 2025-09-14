@@ -31,7 +31,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario create(Usuario usuario) {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "email in use");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso");
         }
         return usuarioRepository.save(usuario);
     }
@@ -100,7 +100,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
         if (!passwordEncoder.matches(actual, usuario.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid password");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La contraseña actual no es válida");
         }
         usuario.setPasswordHash(passwordEncoder.encode(nueva));
         usuarioRepository.save(usuario);
@@ -109,6 +109,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public Usuario me() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "No implementado");
     }
 }
