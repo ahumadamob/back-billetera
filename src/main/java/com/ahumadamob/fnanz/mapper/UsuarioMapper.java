@@ -31,6 +31,13 @@ public class UsuarioMapper {
         return usuario;
     }
 
+    public Usuario toPartialEntity(UsuarioPatchDto dto) {
+        Usuario usuario = new Usuario();
+        usuario.setActivo(null);
+        updateEntity(dto, usuario);
+        return usuario;
+    }
+
     public void updateEntity(UsuarioPatchDto dto, Usuario usuario) {
         Optional.ofNullable(dto.getNombre()).ifPresent(usuario::setNombre);
         Optional.ofNullable(dto.getMonedaBase()).ifPresent(usuario::setMonedaBase);

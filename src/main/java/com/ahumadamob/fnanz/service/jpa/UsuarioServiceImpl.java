@@ -1,12 +1,7 @@
 package com.ahumadamob.fnanz.service.jpa;
 
-import com.ahumadamob.fnanz.dto.UsuarioCreateDto;
-import com.ahumadamob.fnanz.dto.UsuarioPatchDto;
-import com.ahumadamob.fnanz.dto.UsuarioPasswordDto;
-import com.ahumadamob.fnanz.dto.response.UsuarioResponseDto;
 import com.ahumadamob.fnanz.entity.Usuario;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
-import com.ahumadamob.fnanz.mapper.UsuarioMapper;
 import com.ahumadamob.fnanz.repository.UsuarioRepository;
 import com.ahumadamob.fnanz.service.UsuarioService;
 import org.springframework.data.domain.Page;
@@ -26,28 +21,24 @@ import org.springframework.web.server.ResponseStatusException;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, UsuarioMapper mapper, PasswordEncoder passwordEncoder) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
-        this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public UsuarioResponseDto create(UsuarioCreateDto dto) {
-        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+    public Usuario create(Usuario usuario) {
+        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "email in use");
         }
-        Usuario usuario = mapper.toEntity(dto);
-        Usuario saved = usuarioRepository.save(usuario);
-        return mapper.toDto(saved);
+        return usuarioRepository.save(usuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UsuarioResponseDto> list(String q, Boolean activo, Pageable pageable) {
+    public Page<Usuario> list(String q, Boolean activo, Pageable pageable) {
         Specification<Usuario> spec = Specification.where(null);
         if (q != null && !q.isBlank()) {
             String like = "%" + q.toLowerCase() + "%";
@@ -59,23 +50,33 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (activo != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("activo"), activo));
         }
-        return usuarioRepository.findAll(spec, pageable).map(mapper::toDto);
+        return usuarioRepository.findAll(spec, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDto get(Long id) {
-        return mapper.toDto(usuarioRepository.findById(id)
-                .orElseThrow(ResourceNotFoundException::new));
+    public Usuario get(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
-    public UsuarioResponseDto update(Long id, UsuarioPatchDto dto) {
+    public Usuario update(Long id, Usuario cambios) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
-        mapper.updateEntity(dto, usuario);
-        Usuario saved = usuarioRepository.save(usuario);
-        return mapper.toDto(saved);
+        if (cambios.getNombre() != null) {
+            usuario.setNombre(cambios.getNombre());
+        }
+        if (cambios.getMonedaBase() != null) {
+            usuario.setMonedaBase(cambios.getMonedaBase());
+        }
+        if (cambios.getZonaHoraria() != null) {
+            usuario.setZonaHoraria(cambios.getZonaHoraria());
+        }
+        if (cambios.getActivo() != null) {
+            usuario.setActivo(cambios.getActivo());
+        }
+        return usuarioRepository.save(usuario);
     }
 
     @Override
@@ -95,19 +96,19 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void changePassword(Long id, UsuarioPasswordDto dto) {
+    public void changePassword(Long id, String actual, String nueva) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
-        if (!passwordEncoder.matches(dto.getActual(), usuario.getPasswordHash())) {
+        if (!passwordEncoder.matches(actual, usuario.getPasswordHash())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid password");
         }
-        usuario.setPasswordHash(passwordEncoder.encode(dto.getNueva()));
+        usuario.setPasswordHash(passwordEncoder.encode(nueva));
         usuarioRepository.save(usuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioResponseDto me() {
+    public Usuario me() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

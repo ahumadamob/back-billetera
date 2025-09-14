@@ -5,6 +5,8 @@ import com.ahumadamob.fnanz.dto.UsuarioPasswordDto;
 import com.ahumadamob.fnanz.dto.UsuarioPatchDto;
 import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
 import com.ahumadamob.fnanz.dto.response.UsuarioResponseDto;
+import com.ahumadamob.fnanz.entity.Usuario;
+import com.ahumadamob.fnanz.mapper.UsuarioMapper;
 import com.ahumadamob.fnanz.service.UsuarioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,33 +26,41 @@ import static com.ahumadamob.fnanz.controller.ResponseFactory.*;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final UsuarioMapper usuarioMapper;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UsuarioMapper usuarioMapper) {
         this.usuarioService = usuarioService;
+        this.usuarioMapper = usuarioMapper;
     }
 
     @PostMapping
     public ResponseEntity<ApiResponseSuccessDto<UsuarioResponseDto>> create(@Validated @RequestBody UsuarioCreateDto dto) {
-        UsuarioResponseDto createdUser = usuarioService.create(dto);
-        return created(createdUser.getId(), createdUser);
+        Usuario usuario = usuarioMapper.toEntity(dto);
+        Usuario created = usuarioService.create(usuario);
+        UsuarioResponseDto response = usuarioMapper.toDto(created);
+        return created(response.getId(), response);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponseSuccessDto<List<UsuarioResponseDto>>> list(@RequestParam(required = false) String q,
                                                                                 @RequestParam(required = false) Boolean activo,
                                                                                 Pageable pageable) {
-        Page<UsuarioResponseDto> page = usuarioService.list(q, activo, pageable);
-        return page(page);
+        Page<Usuario> page = usuarioService.list(q, activo, pageable);
+        Page<UsuarioResponseDto> dtoPage = page.map(usuarioMapper::toDto);
+        return page(dtoPage);
     }
 
     @GetMapping("/{id}")
     public ApiResponseSuccessDto<UsuarioResponseDto> get(@PathVariable Long id) {
-        return ok(usuarioService.get(id));
+        Usuario usuario = usuarioService.get(id);
+        return ok(usuarioMapper.toDto(usuario));
     }
 
     @PatchMapping("/{id}")
     public ApiResponseSuccessDto<UsuarioResponseDto> update(@PathVariable Long id, @Validated @RequestBody UsuarioPatchDto dto) {
-        return ok(usuarioService.update(id, dto));
+        Usuario cambios = usuarioMapper.toPartialEntity(dto);
+        Usuario updated = usuarioService.update(id, cambios);
+        return ok(usuarioMapper.toDto(updated));
     }
 
     @DeleteMapping("/{id}")
@@ -68,11 +78,12 @@ public class UsuarioController {
     @PostMapping("/{id}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@PathVariable Long id, @Validated @RequestBody UsuarioPasswordDto dto) {
-        usuarioService.changePassword(id, dto);
+        usuarioService.changePassword(id, dto.getActual(), dto.getNueva());
     }
 
     @GetMapping("/me")
     public ApiResponseSuccessDto<UsuarioResponseDto> me() {
-        return ok(usuarioService.me());
+        Usuario usuario = usuarioService.me();
+        return ok(usuarioMapper.toDto(usuario));
     }
 }
