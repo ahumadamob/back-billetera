@@ -39,6 +39,9 @@ public class Usuario extends BaseEntity {
     @Column(name = "moneda_base", nullable = false)
     private Moneda monedaBase;
 
+    @Column(name = "zona_horaria", nullable = false)
+    private String zonaHoraria;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 }
