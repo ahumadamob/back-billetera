@@ -2,7 +2,6 @@ package com.ahumadamob.billeteraapi.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +15,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 
 import org.hibernate.validator.constraints.URL;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pictures")
@@ -58,15 +55,4 @@ public class Picture extends BaseEntity {
     @Column(name = "cover", nullable = false)
     @NotNull
     private Boolean cover = false;
-
-    @Column(name = "created_date", nullable = false)
-    @NotNull
-    private LocalDateTime createdDate;
-
-    @PrePersist
-    public void prePersist() {
-        if (createdDate == null) {
-            createdDate = LocalDateTime.now();
-        }
-    }
 }
