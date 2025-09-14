@@ -1,6 +1,6 @@
-package com.ahumadamob.billeteraapi.repository;
+package com.ahumadamob.fnanz.repository;
 
-import com.ahumadamob.billeteraapi.entity.Usuario;
+import com.ahumadamob.fnanz.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

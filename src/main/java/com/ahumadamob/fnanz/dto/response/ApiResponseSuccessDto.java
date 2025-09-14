@@ -1,4 +1,4 @@
-package com.ahumadamob.billeteraapi.dto.response;
+package com.ahumadamob.fnanz.dto.response;
 
 import java.time.Instant;
 

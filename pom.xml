@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>com.ahumadamob</groupId>
-    <artifactId>billetera-api</artifactId>
+    <artifactId>fnanz</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Billetera</name>
-    <description>API Rest para la administración de una billetera</description>
+    <name>Fnanz</name>
+    <description>API Rest para la administración de finanzas</description>
 
     <properties>
         <java.version>17</java.version>

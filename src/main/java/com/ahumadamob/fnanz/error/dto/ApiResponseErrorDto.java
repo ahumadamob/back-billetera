@@ -1,4 +1,4 @@
-package com.ahumadamob.billeteraapi.error.dto;
+package com.ahumadamob.fnanz.error.dto;
 
 import java.time.Instant;
 import java.util.List;
