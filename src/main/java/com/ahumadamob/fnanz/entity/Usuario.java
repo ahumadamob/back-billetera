@@ -1,6 +1,6 @@
-package com.ahumadamob.billeteraapi.entity;
+package com.ahumadamob.fnanz.entity;
 
-import com.ahumadamob.billeteraapi.enums.Moneda;
+import com.ahumadamob.fnanz.enums.Moneda;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
