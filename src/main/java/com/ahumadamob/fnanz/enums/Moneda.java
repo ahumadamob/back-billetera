@@ -1,4 +1,4 @@
-package com.ahumadamob.billeteraapi.enums;
+package com.ahumadamob.fnanz.enums;
 
 /**
  * Representa las monedas más utilizadas en Argentina.

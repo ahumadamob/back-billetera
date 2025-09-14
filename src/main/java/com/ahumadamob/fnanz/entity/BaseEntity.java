@@ -1,4 +1,4 @@
-package com.ahumadamob.billeteraapi.entity;
+package com.ahumadamob.fnanz.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
