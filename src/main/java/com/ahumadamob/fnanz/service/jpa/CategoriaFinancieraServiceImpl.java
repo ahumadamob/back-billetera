@@ -36,14 +36,15 @@ public class CategoriaFinancieraServiceImpl implements CategoriaFinancieraServic
     @Override
     @Transactional(readOnly = true)
     public Page<CategoriaFinanciera> list(String q, Pageable pageable) {
-        Specification<CategoriaFinanciera> spec = Specification.where(null);
-        if (q != null && !q.isBlank()) {
-            String like = "%" + q.toLowerCase() + "%";
-            spec = spec.and((root, query, cb) -> cb.or(
-                    cb.like(cb.lower(root.get("nombre")), like),
-                    cb.like(cb.lower(cb.coalesce(root.get("descripcion"), "")), like)
-            ));
+        if (q == null || q.isBlank()) {
+            return categoriaFinancieraRepository.findAll(pageable);
         }
+
+        String like = "%" + q.toLowerCase() + "%";
+        Specification<CategoriaFinanciera> spec = (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("nombre")), like),
+                cb.like(cb.lower(cb.coalesce(root.get("descripcion"), "")), like)
+        );
         return categoriaFinancieraRepository.findAll(spec, pageable);
     }
 

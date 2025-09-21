@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -172,16 +171,15 @@ class CategoriaFinancieraServiceImplTest {
     }
 
     @Test
-    void listShouldUseNullSpecificationWhenQueryIsBlank() {
+    void listShouldCallSimpleFindAllWhenQueryIsBlank() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<CategoriaFinanciera> expected = new PageImpl<>(List.of());
-        when(categoriaFinancieraRepository.findAll(any(Specification.class), eq(pageable)))
-                .thenReturn(expected);
+        when(categoriaFinancieraRepository.findAll(pageable)).thenReturn(expected);
 
         Page<CategoriaFinanciera> result = service.list("   ", pageable);
 
         assertThat(result).isSameAs(expected);
-        verify(categoriaFinancieraRepository).findAll(isNull(Specification.class), eq(pageable));
+        verify(categoriaFinancieraRepository).findAll(pageable);
         verifyNoMoreInteractions(categoriaFinancieraRepository);
     }
 
