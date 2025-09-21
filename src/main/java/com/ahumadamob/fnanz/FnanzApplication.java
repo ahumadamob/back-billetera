@@ -1,11 +1,11 @@
-package com.ahumadamob.billeteraapi;
+package com.ahumadamob.fnanz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BilleteraApplication {
+public class FnanzApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BilleteraApplication.class, args);
+        SpringApplication.run(FnanzApplication.class, args);
     }
 }

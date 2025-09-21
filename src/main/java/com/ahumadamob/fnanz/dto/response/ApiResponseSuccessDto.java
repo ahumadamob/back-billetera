@@ -1,4 +1,4 @@
-package com.ahumadamob.billeteraapi.dto.response;
+package com.ahumadamob.fnanz.dto.response;
 
 import java.time.Instant;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiResponse<T> {
+public class ApiResponseSuccessDto<T> {
     private String message;
     private T data;
 
