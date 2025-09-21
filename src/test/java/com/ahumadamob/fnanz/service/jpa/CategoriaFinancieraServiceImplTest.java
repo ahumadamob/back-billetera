@@ -175,13 +175,13 @@ class CategoriaFinancieraServiceImplTest {
     void listShouldUseNullSpecificationWhenQueryIsBlank() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<CategoriaFinanciera> expected = new PageImpl<>(List.of());
-        when(categoriaFinancieraRepository.findAll((Specification<CategoriaFinanciera>) any(), eq(pageable)))
+        when(categoriaFinancieraRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(expected);
 
         Page<CategoriaFinanciera> result = service.list("   ", pageable);
 
         assertThat(result).isSameAs(expected);
-        verify(categoriaFinancieraRepository).findAll(isNull(), eq(pageable));
+        verify(categoriaFinancieraRepository).findAll(isNull(Specification.class), eq(pageable));
         verifyNoMoreInteractions(categoriaFinancieraRepository);
     }
 
@@ -189,7 +189,7 @@ class CategoriaFinancieraServiceImplTest {
     void listShouldBuildSpecificationWhenQueryIsPresent() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<CategoriaFinanciera> expected = new PageImpl<>(List.of());
-        when(categoriaFinancieraRepository.findAll((Specification<CategoriaFinanciera>) any(), eq(pageable)))
+        when(categoriaFinancieraRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(expected);
 
         Page<CategoriaFinanciera> result = service.list("ing", pageable);
