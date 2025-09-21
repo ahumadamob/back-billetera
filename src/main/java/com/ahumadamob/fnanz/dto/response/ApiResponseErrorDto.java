@@ -1,4 +1,4 @@
-package com.ahumadamob.fnanz.error.dto;
+package com.ahumadamob.fnanz.dto.response;
 
 import java.time.Instant;
 import java.util.List;
@@ -39,7 +39,7 @@ public class ApiResponseErrorDto {
     @AllArgsConstructor
     public static class Message {
         private String field;
-        private String value;
+        private String message;
     }
 }
 

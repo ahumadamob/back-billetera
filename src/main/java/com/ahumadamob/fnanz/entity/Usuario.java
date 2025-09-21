@@ -22,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Usuario extends BaseEntity {
 
-    @Column(name = "nombre", nullable = false)
+    @Column(name = "nombre", nullable = false, unique = true)
     @NotBlank
     private String nombre;
 
@@ -38,7 +38,4 @@ public class Usuario extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "moneda_base", nullable = false)
     private Moneda monedaBase;
-
-    @Column(name = "activo", nullable = false)
-    private Boolean activo = true;
 }
