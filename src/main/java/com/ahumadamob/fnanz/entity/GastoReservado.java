@@ -16,7 +16,6 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,13 +45,11 @@ public class GastoReservado extends BaseEntity {
     @Column(name = "concepto", length = 120)
     private String concepto;
 
-    /** Usar el 1er día del mes como convención de periodo */
     @NotNull
-    @Column(name = "periodo_fecha", nullable = false)
-    private LocalDate periodoFecha;
-
-    @Column(name = "fecha_vencimiento")
-    private LocalDate fechaVencimiento;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "periodo_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_reserva_periodo"))
+    private PeriodoFinanciero periodo;
 
     @NotNull
     @Enumerated(EnumType.STRING)

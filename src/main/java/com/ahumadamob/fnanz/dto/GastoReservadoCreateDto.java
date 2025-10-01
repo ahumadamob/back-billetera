@@ -3,7 +3,6 @@ package com.ahumadamob.fnanz.dto;
 import com.ahumadamob.fnanz.enums.EstadoReserva;
 import com.ahumadamob.fnanz.enums.TipoFin;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,9 +21,7 @@ public class GastoReservadoCreateDto {
 
     private String concepto;
 
-    private LocalDate periodoFecha;
-
-    private LocalDate fechaVencimiento;
+    private Long periodoId;
 
     private EstadoReserva estado;
 
