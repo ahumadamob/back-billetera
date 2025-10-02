@@ -1,8 +1,14 @@
 package com.ahumadamob.fnanz.service.jpa;
 
+import com.ahumadamob.fnanz.dto.response.GastoReservadoCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
+import com.ahumadamob.fnanz.enums.TipoFin;
+import com.ahumadamob.fnanz.repository.GastoReservadoRepository;
 import com.ahumadamob.fnanz.repository.PeriodoFinancieroRepository;
+import com.ahumadamob.fnanz.repository.projection.GastoReservadoCategoriaResumenProjection;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +33,9 @@ class PeriodoFinancieroServiceImplTest {
 
     @Mock
     private PeriodoFinancieroRepository periodoFinancieroRepository;
+
+    @Mock
+    private GastoReservadoRepository gastoReservadoRepository;
 
     @InjectMocks
     private PeriodoFinancieroServiceImpl service;
@@ -148,6 +157,50 @@ class PeriodoFinancieroServiceImplTest {
         verify(periodoFinancieroRepository, never()).deleteById(40L);
     }
 
+    @Test
+    void obtenerResumenReservasShouldAggregateByCategoria() {
+        when(periodoFinancieroRepository.existsById(5L)).thenReturn(true);
+        when(gastoReservadoRepository.sumByPeriodoId(5L)).thenReturn(List.of(
+                projection(2L, "Consultoría", TipoFin.INGRESO, 20,
+                        new BigDecimal("500.00"), new BigDecimal("450.00")),
+                projection(1L, "Salario", TipoFin.INGRESO, 10,
+                        new BigDecimal("1000.00"), null),
+                projection(3L, "Renta", TipoFin.EGRESO, 5,
+                        new BigDecimal("600.00"), new BigDecimal("580.00"))
+        ));
+
+        PeriodoFinancieroReservasResumenDto resumen = service.obtenerResumenReservas(5L);
+
+        assertThat(resumen.getIngresos()).extracting(GastoReservadoCategoriaResumenDto::getCategoriaNombre)
+                .containsExactly("Salario", "Consultoría");
+        assertThat(resumen.getEgresos()).extracting(GastoReservadoCategoriaResumenDto::getCategoriaNombre)
+                .containsExactly("Renta");
+        assertThat(resumen.getTotalIngresos().getMontoReservado())
+                .isEqualByComparingTo(new BigDecimal("1500.00"));
+        assertThat(resumen.getTotalIngresos().getMontoAplicado())
+                .isEqualByComparingTo(new BigDecimal("450.00"));
+        assertThat(resumen.getTotalEgresos().getMontoReservado())
+                .isEqualByComparingTo(new BigDecimal("600.00"));
+        assertThat(resumen.getTotalGeneral().getMontoReservado())
+                .isEqualByComparingTo(new BigDecimal("900.00"));
+        assertThat(resumen.getTotalGeneral().getMontoAplicado())
+                .isEqualByComparingTo(new BigDecimal("-130.00"));
+
+        verify(periodoFinancieroRepository).existsById(5L);
+        verify(gastoReservadoRepository).sumByPeriodoId(5L);
+    }
+
+    @Test
+    void obtenerResumenReservasShouldThrowWhenPeriodoDoesNotExist() {
+        when(periodoFinancieroRepository.existsById(77L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.obtenerResumenReservas(77L))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(periodoFinancieroRepository).existsById(77L);
+        verify(gastoReservadoRepository, never()).sumByPeriodoId(77L);
+    }
+
     private PeriodoFinanciero buildPeriodo(Long id, String nombre, LocalDate inicio, LocalDate fin) {
         PeriodoFinanciero periodo = new PeriodoFinanciero();
         periodo.setId(id);
@@ -156,5 +209,40 @@ class PeriodoFinancieroServiceImplTest {
         periodo.setFechaFin(fin);
         periodo.setCerrado(false);
         return periodo;
+    }
+
+    private GastoReservadoCategoriaResumenProjection projection(Long categoriaId, String nombre,
+            TipoFin tipo, Integer orden, BigDecimal reservado, BigDecimal aplicado) {
+        return new GastoReservadoCategoriaResumenProjection() {
+            @Override
+            public Long getCategoriaId() {
+                return categoriaId;
+            }
+
+            @Override
+            public String getCategoriaNombre() {
+                return nombre;
+            }
+
+            @Override
+            public TipoFin getTipo() {
+                return tipo;
+            }
+
+            @Override
+            public Integer getCategoriaOrden() {
+                return orden;
+            }
+
+            @Override
+            public BigDecimal getTotalMontoReservado() {
+                return reservado;
+            }
+
+            @Override
+            public BigDecimal getTotalMontoAplicado() {
+                return aplicado;
+            }
+        };
     }
 }
