@@ -8,8 +8,10 @@ import com.ahumadamob.fnanz.entity.GastoReservado;
 import com.ahumadamob.fnanz.enums.EstadoReserva;
 import com.ahumadamob.fnanz.enums.TipoFin;
 import com.ahumadamob.fnanz.mapper.GastoReservadoMapper;
+import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.service.CategoriaFinancieraService;
 import com.ahumadamob.fnanz.service.GastoReservadoService;
+import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -62,14 +64,16 @@ class GastoReservadoControllerTest {
     @MockBean
     private GastoReservadoMapper gastoReservadoMapper;
 
+    @MockBean
+    private PeriodoFinancieroService periodoFinancieroService;
+
     @Test
     void createShouldReturnCreatedResponseWithLocationHeader() throws Exception {
         GastoReservadoCreateDto requestDto = new GastoReservadoCreateDto();
         requestDto.setTipo(TipoFin.EGRESO);
         requestDto.setCategoriaId(5L);
         requestDto.setConcepto("Pago consultoría");
-        requestDto.setPeriodoFecha(LocalDate.of(2024, 5, 1));
-        requestDto.setFechaVencimiento(LocalDate.of(2024, 5, 10));
+        requestDto.setPeriodoId(7L);
         requestDto.setEstado(EstadoReserva.RESERVADO);
         requestDto.setMontoReservado(new BigDecimal("1500.00"));
         requestDto.setMontoAplicado(new BigDecimal("0.00"));
@@ -80,9 +84,16 @@ class GastoReservadoControllerTest {
         categoria.setNombre("Servicios");
         categoria.setTipo(TipoFin.EGRESO);
 
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(7L);
+        periodo.setNombre("Mayo 2024");
+        periodo.setFechaInicio(LocalDate.of(2024, 5, 1));
+        periodo.setFechaFin(LocalDate.of(2024, 5, 31));
+
         GastoReservado entityToCreate = new GastoReservado();
         entityToCreate.setTipo(TipoFin.EGRESO);
         entityToCreate.setCategoria(categoria);
+        entityToCreate.setPeriodo(periodo);
         entityToCreate.setConcepto("Pago consultoría");
 
         LocalDateTime now = LocalDateTime.of(2024, 5, 2, 12, 0);
@@ -90,8 +101,8 @@ class GastoReservadoControllerTest {
         saved.setId(11L);
         saved.setTipo(TipoFin.EGRESO);
         saved.setCategoria(categoria);
+        saved.setPeriodo(periodo);
         saved.setConcepto("Pago consultoría");
-        saved.setPeriodoFecha(LocalDate.of(2024, 5, 1));
         saved.setEstado(EstadoReserva.RESERVADO);
         saved.setMontoReservado(new BigDecimal("1500.00"));
         saved.setMontoAplicado(BigDecimal.ZERO);
@@ -105,8 +116,10 @@ class GastoReservadoControllerTest {
                 5L,
                 "Servicios",
                 "Pago consultoría",
+                7L,
+                "Mayo 2024",
                 LocalDate.of(2024, 5, 1),
-                LocalDate.of(2024, 5, 10),
+                LocalDate.of(2024, 5, 31),
                 EstadoReserva.RESERVADO,
                 new BigDecimal("1500.00"),
                 BigDecimal.ZERO,
@@ -116,7 +129,8 @@ class GastoReservadoControllerTest {
         );
 
         when(categoriaFinancieraService.get(5L)).thenReturn(categoria);
-        when(gastoReservadoMapper.toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria)))
+        when(periodoFinancieroService.get(7L)).thenReturn(periodo);
+        when(gastoReservadoMapper.toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria), eq(periodo)))
                 .thenReturn(entityToCreate);
         when(gastoReservadoService.create(entityToCreate)).thenReturn(saved);
         when(gastoReservadoMapper.toDto(saved)).thenReturn(responseDto);
@@ -131,15 +145,20 @@ class GastoReservadoControllerTest {
                 .andExpect(jsonPath("$.data.tipo").value(TipoFin.EGRESO.name()))
                 .andExpect(jsonPath("$.data.categoriaId").value(5L))
                 .andExpect(jsonPath("$.data.concepto").value("Pago consultoría"))
+                .andExpect(jsonPath("$.data.periodoId").value(7L))
+                .andExpect(jsonPath("$.data.periodoNombre").value("Mayo 2024"))
+                .andExpect(jsonPath("$.data.periodoFechaInicio").value("2024-05-01"))
+                .andExpect(jsonPath("$.data.periodoFechaFin").value("2024-05-31"))
                 .andExpect(jsonPath("$.data.estado").value(EstadoReserva.RESERVADO.name()))
                 .andExpect(jsonPath("$.data.montoReservado").value(1500.00))
                 .andExpect(jsonPath("$.timestamp").exists());
 
         verify(categoriaFinancieraService).get(5L);
-        verify(gastoReservadoMapper).toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria));
+        verify(periodoFinancieroService).get(7L);
+        verify(gastoReservadoMapper).toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria), eq(periodo));
         verify(gastoReservadoService).create(entityToCreate);
         verify(gastoReservadoMapper).toDto(saved);
-        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper);
+        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
     }
 
     @Test
@@ -170,8 +189,10 @@ class GastoReservadoControllerTest {
                 5L,
                 "Servicios",
                 "Pago consultoría",
+                3L,
+                "Mayo 2024",
                 LocalDate.of(2024, 5, 1),
-                LocalDate.of(2024, 5, 10),
+                LocalDate.of(2024, 5, 31),
                 EstadoReserva.RESERVADO,
                 new BigDecimal("1500.00"),
                 BigDecimal.ZERO,
@@ -186,8 +207,10 @@ class GastoReservadoControllerTest {
                 6L,
                 "Salarios",
                 "Ingreso mensual",
-                LocalDate.of(2024, 5, 1),
-                null,
+                4L,
+                "2024",
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2024, 12, 31),
                 EstadoReserva.APLICADO,
                 new BigDecimal("5000.00"),
                 new BigDecimal("5000.00"),
@@ -220,7 +243,7 @@ class GastoReservadoControllerTest {
         verify(gastoReservadoService).list(ArgumentMatchers.isNull(), any(Pageable.class));
         verify(gastoReservadoMapper).toDto(egreso);
         verify(gastoReservadoMapper).toDto(ingreso);
-        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService);
+        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
     }
 
     @Test
@@ -235,14 +258,22 @@ class GastoReservadoControllerTest {
         gasto.setCategoria(categoria);
         gasto.setTipo(TipoFin.EGRESO);
 
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(8L);
+        periodo.setNombre("Junio 2024");
+        periodo.setFechaInicio(LocalDate.of(2024, 6, 1));
+        periodo.setFechaFin(LocalDate.of(2024, 6, 30));
+
         GastoReservadoResponseDto dto = new GastoReservadoResponseDto(
                 30L,
                 TipoFin.EGRESO,
                 7L,
                 "Honorarios",
                 "Pago asesoría",
+                8L,
+                "Junio 2024",
                 LocalDate.of(2024, 6, 1),
-                LocalDate.of(2024, 6, 10),
+                LocalDate.of(2024, 6, 30),
                 EstadoReserva.RESERVADO,
                 new BigDecimal("1200.00"),
                 null,
@@ -262,7 +293,7 @@ class GastoReservadoControllerTest {
 
         verify(gastoReservadoService).get(30L);
         verify(gastoReservadoMapper).toDto(gasto);
-        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService);
+        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
     }
 
     @Test
@@ -270,6 +301,7 @@ class GastoReservadoControllerTest {
         GastoReservadoPatchDto patchDto = new GastoReservadoPatchDto();
         patchDto.setCategoriaId(9L);
         patchDto.setConcepto("Actualizado");
+        patchDto.setPeriodoId(12L);
         patchDto.setMontoReservado(new BigDecimal("1800.00"));
 
         CategoriaFinanciera categoria = new CategoriaFinanciera();
@@ -277,15 +309,23 @@ class GastoReservadoControllerTest {
         categoria.setNombre("Servicios");
         categoria.setTipo(TipoFin.EGRESO);
 
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(12L);
+        periodo.setNombre("Julio 2024");
+        periodo.setFechaInicio(LocalDate.of(2024, 7, 1));
+        periodo.setFechaFin(LocalDate.of(2024, 7, 31));
+
         GastoReservado cambios = new GastoReservado();
         cambios.setCategoria(categoria);
         cambios.setConcepto("Actualizado");
+        cambios.setPeriodo(periodo);
 
         GastoReservado updated = new GastoReservado();
         updated.setId(40L);
         updated.setCategoria(categoria);
         updated.setTipo(TipoFin.EGRESO);
         updated.setConcepto("Actualizado");
+        updated.setPeriodo(periodo);
         updated.setMontoReservado(new BigDecimal("1800.00"));
 
         GastoReservadoResponseDto responseDto = new GastoReservadoResponseDto(
@@ -294,8 +334,10 @@ class GastoReservadoControllerTest {
                 9L,
                 "Servicios",
                 "Actualizado",
+                12L,
+                "Julio 2024",
                 LocalDate.of(2024, 7, 1),
-                null,
+                LocalDate.of(2024, 7, 31),
                 EstadoReserva.RESERVADO,
                 new BigDecimal("1800.00"),
                 null,
@@ -305,7 +347,8 @@ class GastoReservadoControllerTest {
         );
 
         when(categoriaFinancieraService.get(9L)).thenReturn(categoria);
-        when(gastoReservadoMapper.toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria)))
+        when(periodoFinancieroService.get(12L)).thenReturn(periodo);
+        when(gastoReservadoMapper.toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria), eq(periodo)))
                 .thenReturn(cambios);
         when(gastoReservadoService.update(40L, cambios)).thenReturn(updated);
         when(gastoReservadoMapper.toDto(updated)).thenReturn(responseDto);
@@ -316,14 +359,16 @@ class GastoReservadoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(40L))
                 .andExpect(jsonPath("$.data.categoriaId").value(9L))
+                .andExpect(jsonPath("$.data.periodoId").value(12L))
                 .andExpect(jsonPath("$.data.montoReservado").value(1800.00))
                 .andExpect(jsonPath("$.timestamp").exists());
 
         verify(categoriaFinancieraService).get(9L);
-        verify(gastoReservadoMapper).toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria));
+        verify(periodoFinancieroService).get(12L);
+        verify(gastoReservadoMapper).toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria), eq(periodo));
         verify(gastoReservadoService).update(40L, cambios);
         verify(gastoReservadoMapper).toDto(updated);
-        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper);
+        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
     }
 
     @Test
@@ -335,6 +380,6 @@ class GastoReservadoControllerTest {
 
         verify(gastoReservadoService).delete(55L);
         verifyNoMoreInteractions(gastoReservadoService);
-        verifyNoMoreInteractions(categoriaFinancieraService, gastoReservadoMapper);
-    }
+        verifyNoMoreInteractions(categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
+}
 }

@@ -26,7 +26,7 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
 
     @Override
     public GastoReservado create(GastoReservado gastoReservado) {
-        validateCategoriaAndTipo(gastoReservado);
+        validateCategoriaTipoYPeriodo(gastoReservado);
         return gastoReservadoRepository.save(gastoReservado);
     }
 
@@ -39,10 +39,12 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
         String like = "%" + q.toLowerCase() + "%";
         Specification<GastoReservado> spec = (root, query, cb) -> {
             var categoriaJoin = root.join("categoria");
+            var periodoJoin = root.join("periodo");
             return cb.or(
                     cb.like(cb.lower(cb.coalesce(root.get("concepto"), "")), like),
                     cb.like(cb.lower(cb.coalesce(root.get("nota"), "")), like),
-                    cb.like(cb.lower(categoriaJoin.get("nombre")), like)
+                    cb.like(cb.lower(categoriaJoin.get("nombre")), like),
+                    cb.like(cb.lower(cb.coalesce(periodoJoin.get("nombre"), "")), like)
             );
         };
         return gastoReservadoRepository.findAll(spec, pageable);
@@ -69,11 +71,8 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
         if (cambios.getConcepto() != null) {
             gasto.setConcepto(cambios.getConcepto());
         }
-        if (cambios.getPeriodoFecha() != null) {
-            gasto.setPeriodoFecha(cambios.getPeriodoFecha());
-        }
-        if (cambios.getFechaVencimiento() != null) {
-            gasto.setFechaVencimiento(cambios.getFechaVencimiento());
+        if (cambios.getPeriodo() != null) {
+            gasto.setPeriodo(cambios.getPeriodo());
         }
         if (cambios.getEstado() != null) {
             gasto.setEstado(cambios.getEstado());
@@ -88,7 +87,7 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
             gasto.setNota(cambios.getNota());
         }
 
-        validateCategoriaAndTipo(gasto);
+        validateCategoriaTipoYPeriodo(gasto);
         return gastoReservadoRepository.save(gasto);
     }
 
@@ -100,9 +99,12 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
         gastoReservadoRepository.deleteById(id);
     }
 
-    private void validateCategoriaAndTipo(GastoReservado gastoReservado) {
+    private void validateCategoriaTipoYPeriodo(GastoReservado gastoReservado) {
         if (gastoReservado.getCategoria() == null) {
             throw new ResourceConflictException("categoriaId", "La categoría asociada no es válida");
+        }
+        if (gastoReservado.getPeriodo() == null) {
+            throw new ResourceConflictException("periodoId", "El periodo asociado no es válido");
         }
         if (gastoReservado.getTipo() != null
                 && gastoReservado.getCategoria().getTipo() != null

@@ -5,6 +5,7 @@ import com.ahumadamob.fnanz.dto.GastoReservadoPatchDto;
 import com.ahumadamob.fnanz.dto.response.GastoReservadoResponseDto;
 import com.ahumadamob.fnanz.entity.CategoriaFinanciera;
 import com.ahumadamob.fnanz.entity.GastoReservado;
+import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.enums.EstadoReserva;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -15,13 +16,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class GastoReservadoMapper {
 
-    public GastoReservado toEntity(GastoReservadoCreateDto dto, CategoriaFinanciera categoria) {
+    public GastoReservado toEntity(GastoReservadoCreateDto dto, CategoriaFinanciera categoria,
+            PeriodoFinanciero periodo) {
         GastoReservado gasto = new GastoReservado();
         gasto.setTipo(dto.getTipo());
         gasto.setCategoria(categoria);
         gasto.setConcepto(dto.getConcepto());
-        gasto.setPeriodoFecha(dto.getPeriodoFecha());
-        gasto.setFechaVencimiento(dto.getFechaVencimiento());
+        gasto.setPeriodo(periodo);
         gasto.setEstado(Optional.ofNullable(dto.getEstado()).orElse(EstadoReserva.RESERVADO));
         gasto.setMontoReservado(dto.getMontoReservado());
         gasto.setMontoAplicado(dto.getMontoAplicado());
@@ -29,20 +30,23 @@ public class GastoReservadoMapper {
         return gasto;
     }
 
-    public GastoReservado toPartialEntity(GastoReservadoPatchDto dto, CategoriaFinanciera categoria) {
+    public GastoReservado toPartialEntity(GastoReservadoPatchDto dto, CategoriaFinanciera categoria,
+            PeriodoFinanciero periodo) {
         GastoReservado gasto = new GastoReservado();
-        updateEntity(dto, gasto, categoria);
+        updateEntity(dto, gasto, categoria, periodo);
         return gasto;
     }
 
-    public void updateEntity(GastoReservadoPatchDto dto, GastoReservado gasto, CategoriaFinanciera categoria) {
+    public void updateEntity(GastoReservadoPatchDto dto, GastoReservado gasto, CategoriaFinanciera categoria,
+            PeriodoFinanciero periodo) {
         Optional.ofNullable(dto.getTipo()).ifPresent(gasto::setTipo);
         if (categoria != null) {
             gasto.setCategoria(categoria);
         }
+        if (periodo != null) {
+            gasto.setPeriodo(periodo);
+        }
         Optional.ofNullable(dto.getConcepto()).ifPresent(gasto::setConcepto);
-        Optional.ofNullable(dto.getPeriodoFecha()).ifPresent(gasto::setPeriodoFecha);
-        Optional.ofNullable(dto.getFechaVencimiento()).ifPresent(gasto::setFechaVencimiento);
         Optional.ofNullable(dto.getEstado()).ifPresent(gasto::setEstado);
         Optional.ofNullable(dto.getMontoReservado()).ifPresent(gasto::setMontoReservado);
         Optional.ofNullable(dto.getMontoAplicado()).ifPresent(gasto::setMontoAplicado);
@@ -51,14 +55,17 @@ public class GastoReservadoMapper {
 
     public GastoReservadoResponseDto toDto(GastoReservado gasto) {
         CategoriaFinanciera categoria = gasto.getCategoria();
+        PeriodoFinanciero periodo = gasto.getPeriodo();
         return new GastoReservadoResponseDto(
                 gasto.getId(),
                 gasto.getTipo(),
                 categoria != null ? categoria.getId() : null,
                 categoria != null ? categoria.getNombre() : null,
                 gasto.getConcepto(),
-                gasto.getPeriodoFecha(),
-                gasto.getFechaVencimiento(),
+                periodo != null ? periodo.getId() : null,
+                periodo != null ? periodo.getNombre() : null,
+                periodo != null ? periodo.getFechaInicio() : null,
+                periodo != null ? periodo.getFechaFin() : null,
                 gasto.getEstado(),
                 gasto.getMontoReservado(),
                 gasto.getMontoAplicado(),

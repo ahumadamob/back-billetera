@@ -6,9 +6,11 @@ import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
 import com.ahumadamob.fnanz.dto.response.GastoReservadoResponseDto;
 import com.ahumadamob.fnanz.entity.CategoriaFinanciera;
 import com.ahumadamob.fnanz.entity.GastoReservado;
+import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.mapper.GastoReservadoMapper;
 import com.ahumadamob.fnanz.service.CategoriaFinancieraService;
 import com.ahumadamob.fnanz.service.GastoReservadoService;
+import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,19 +40,23 @@ public class GastoReservadoController {
     private final GastoReservadoService gastoReservadoService;
     private final CategoriaFinancieraService categoriaFinancieraService;
     private final GastoReservadoMapper gastoReservadoMapper;
+    private final PeriodoFinancieroService periodoFinancieroService;
 
     public GastoReservadoController(GastoReservadoService gastoReservadoService,
                                     CategoriaFinancieraService categoriaFinancieraService,
-                                    GastoReservadoMapper gastoReservadoMapper) {
+                                    GastoReservadoMapper gastoReservadoMapper,
+                                    PeriodoFinancieroService periodoFinancieroService) {
         this.gastoReservadoService = gastoReservadoService;
         this.categoriaFinancieraService = categoriaFinancieraService;
         this.gastoReservadoMapper = gastoReservadoMapper;
+        this.periodoFinancieroService = periodoFinancieroService;
     }
 
     @PostMapping
     public ResponseEntity<ApiResponseSuccessDto<GastoReservadoResponseDto>> create(@Validated @RequestBody GastoReservadoCreateDto dto) {
         CategoriaFinanciera categoria = categoriaFinancieraService.get(dto.getCategoriaId());
-        GastoReservado gasto = gastoReservadoMapper.toEntity(dto, categoria);
+        PeriodoFinanciero periodo = periodoFinancieroService.get(dto.getPeriodoId());
+        GastoReservado gasto = gastoReservadoMapper.toEntity(dto, categoria, periodo);
         GastoReservado created = gastoReservadoService.create(gasto);
         GastoReservadoResponseDto response = gastoReservadoMapper.toDto(created);
         return created(response.getId(), "Gasto reservado creado correctamente", response);
@@ -77,7 +83,10 @@ public class GastoReservadoController {
         if (dto.getCategoriaId() != null) {
             categoria = categoriaFinancieraService.get(dto.getCategoriaId());
         }
-        GastoReservado cambios = gastoReservadoMapper.toPartialEntity(dto, categoria);
+        PeriodoFinanciero periodo = dto.getPeriodoId() != null
+                ? periodoFinancieroService.get(dto.getPeriodoId())
+                : null;
+        GastoReservado cambios = gastoReservadoMapper.toPartialEntity(dto, categoria, periodo);
         GastoReservado updated = gastoReservadoService.update(id, cambios);
         return ok(gastoReservadoMapper.toDto(updated));
     }

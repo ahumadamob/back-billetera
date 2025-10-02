@@ -29,9 +29,13 @@ public class GastoReservadoResponseDto {
 
     private String concepto;
 
-    private LocalDate periodoFecha;
+    private Long periodoId;
 
-    private LocalDate fechaVencimiento;
+    private String periodoNombre;
+
+    private LocalDate periodoFechaInicio;
+
+    private LocalDate periodoFechaFin;
 
     private EstadoReserva estado;
 

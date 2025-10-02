@@ -2,6 +2,7 @@ package com.ahumadamob.fnanz.service.jpa;
 
 import com.ahumadamob.fnanz.entity.CategoriaFinanciera;
 import com.ahumadamob.fnanz.entity.GastoReservado;
+import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.enums.EstadoReserva;
 import com.ahumadamob.fnanz.enums.TipoFin;
 import com.ahumadamob.fnanz.error.ResourceConflictException;
@@ -44,10 +45,11 @@ class GastoReservadoServiceImplTest {
     @Test
     void createShouldPersistWhenTipoMatchesCategoria() {
         CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
-        GastoReservado toCreate = buildGasto(null, TipoFin.EGRESO, categoria);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        GastoReservado toCreate = buildGasto(null, TipoFin.EGRESO, categoria, periodo);
         toCreate.setEstado(EstadoReserva.RESERVADO);
 
-        GastoReservado saved = buildGasto(10L, TipoFin.EGRESO, categoria);
+        GastoReservado saved = buildGasto(10L, TipoFin.EGRESO, categoria, periodo);
         saved.setEstado(EstadoReserva.RESERVADO);
 
         when(gastoReservadoRepository.save(toCreate)).thenReturn(saved);
@@ -60,7 +62,8 @@ class GastoReservadoServiceImplTest {
     @Test
     void createShouldThrowConflictWhenTipoDiffersFromCategoria() {
         CategoriaFinanciera categoria = buildCategoria(1L, "Salario", TipoFin.INGRESO);
-        GastoReservado toCreate = buildGasto(null, TipoFin.EGRESO, categoria);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        GastoReservado toCreate = buildGasto(null, TipoFin.EGRESO, categoria, periodo);
 
         assertThatThrownBy(() -> service.create(toCreate))
                 .isInstanceOf(ResourceConflictException.class);
@@ -70,7 +73,8 @@ class GastoReservadoServiceImplTest {
     @Test
     void getShouldReturnGastoWhenExists() {
         CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
-        GastoReservado gasto = buildGasto(5L, TipoFin.EGRESO, categoria);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        GastoReservado gasto = buildGasto(5L, TipoFin.EGRESO, categoria, periodo);
         when(gastoReservadoRepository.findById(5L)).thenReturn(Optional.of(gasto));
 
         GastoReservado result = service.get(5L);
@@ -90,7 +94,9 @@ class GastoReservadoServiceImplTest {
     void updateShouldApplyProvidedChanges() {
         CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
         CategoriaFinanciera nuevaCategoria = buildCategoria(2L, "Honorarios", TipoFin.EGRESO);
-        GastoReservado existing = buildGasto(8L, TipoFin.EGRESO, categoria);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        PeriodoFinanciero nuevoPeriodo = buildPeriodo(2L, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 30));
+        GastoReservado existing = buildGasto(8L, TipoFin.EGRESO, categoria, periodo);
         existing.setConcepto("Pago consultoría");
         existing.setNota("Mensual");
 
@@ -98,8 +104,7 @@ class GastoReservadoServiceImplTest {
         cambios.setTipo(TipoFin.EGRESO);
         cambios.setCategoria(nuevaCategoria);
         cambios.setConcepto("Pago asesoría");
-        cambios.setPeriodoFecha(LocalDate.of(2024, 6, 1));
-        cambios.setFechaVencimiento(LocalDate.of(2024, 6, 10));
+        cambios.setPeriodo(nuevoPeriodo);
         cambios.setEstado(EstadoReserva.APLICADO);
         cambios.setMontoReservado(new BigDecimal("2000.00"));
         cambios.setMontoAplicado(new BigDecimal("1800.00"));
@@ -112,8 +117,7 @@ class GastoReservadoServiceImplTest {
 
         assertThat(result.getCategoria()).isSameAs(nuevaCategoria);
         assertThat(result.getConcepto()).isEqualTo("Pago asesoría");
-        assertThat(result.getPeriodoFecha()).isEqualTo(LocalDate.of(2024, 6, 1));
-        assertThat(result.getFechaVencimiento()).isEqualTo(LocalDate.of(2024, 6, 10));
+        assertThat(result.getPeriodo()).isSameAs(nuevoPeriodo);
         assertThat(result.getEstado()).isEqualTo(EstadoReserva.APLICADO);
         assertThat(result.getMontoReservado()).isEqualByComparingTo("2000.00");
         assertThat(result.getMontoAplicado()).isEqualByComparingTo("1800.00");
@@ -123,7 +127,8 @@ class GastoReservadoServiceImplTest {
     @Test
     void updateShouldThrowConflictWhenTipoDoesNotMatchCategoria() {
         CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
-        GastoReservado existing = buildGasto(8L, TipoFin.EGRESO, categoria);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        GastoReservado existing = buildGasto(8L, TipoFin.EGRESO, categoria, periodo);
 
         GastoReservado cambios = new GastoReservado();
         cambios.setTipo(TipoFin.INGRESO);
@@ -139,6 +144,7 @@ class GastoReservadoServiceImplTest {
     void updateShouldThrowWhenGastoDoesNotExist() {
         GastoReservado cambios = new GastoReservado();
         cambios.setTipo(TipoFin.EGRESO);
+        cambios.setPeriodo(buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31)));
 
         when(gastoReservadoRepository.findById(8L)).thenReturn(Optional.empty());
 
@@ -200,12 +206,22 @@ class GastoReservadoServiceImplTest {
         return categoria;
     }
 
-    private GastoReservado buildGasto(Long id, TipoFin tipo, CategoriaFinanciera categoria) {
+    private PeriodoFinanciero buildPeriodo(Long id, LocalDate inicio, LocalDate fin) {
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(id);
+        periodo.setNombre("Periodo " + id);
+        periodo.setFechaInicio(inicio);
+        periodo.setFechaFin(fin);
+        periodo.setCerrado(false);
+        return periodo;
+    }
+
+    private GastoReservado buildGasto(Long id, TipoFin tipo, CategoriaFinanciera categoria, PeriodoFinanciero periodo) {
         GastoReservado gasto = new GastoReservado();
         gasto.setId(id);
         gasto.setTipo(tipo);
         gasto.setCategoria(categoria);
-        gasto.setPeriodoFecha(LocalDate.of(2024, 5, 1));
+        gasto.setPeriodo(periodo);
         gasto.setMontoReservado(new BigDecimal("1000.00"));
         return gasto;
     }
