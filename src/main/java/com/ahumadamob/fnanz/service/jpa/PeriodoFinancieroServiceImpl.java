@@ -4,6 +4,8 @@ import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import com.ahumadamob.fnanz.repository.PeriodoFinancieroRepository;
 import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,11 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
 
     public PeriodoFinancieroServiceImpl(PeriodoFinancieroRepository periodoFinancieroRepository) {
         this.periodoFinancieroRepository = periodoFinancieroRepository;
+    }
+
+    @Override
+    public Page<PeriodoFinanciero> list(Pageable pageable) {
+        return periodoFinancieroRepository.findAll(pageable);
     }
 
     @Override
