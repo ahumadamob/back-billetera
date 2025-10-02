@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,21 @@ class PeriodoFinancieroServiceImplTest {
 
     @InjectMocks
     private PeriodoFinancieroServiceImpl service;
+
+    @Test
+    void createShouldPersistPeriodoWithDefaultCerradoWhenNull() {
+        PeriodoFinanciero periodo = buildPeriodo(null, "Mayo 2024",
+                LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        periodo.setCerrado(null);
+
+        when(periodoFinancieroRepository.save(periodo)).thenReturn(periodo);
+
+        PeriodoFinanciero result = service.create(periodo);
+
+        assertThat(result).isSameAs(periodo);
+        assertThat(periodo.getCerrado()).isFalse();
+        verify(periodoFinancieroRepository).save(periodo);
+    }
 
     @Test
     void getShouldReturnPeriodoWhenExists() {
@@ -62,6 +78,74 @@ class PeriodoFinancieroServiceImplTest {
 
         assertThatThrownBy(() -> service.get(9L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void replaceShouldOverwriteAllFields() {
+        PeriodoFinanciero existente = buildPeriodo(12L, "Abril", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30));
+        existente.setDescripcion("Periodo original");
+        existente.setTipo("Mensual");
+
+        PeriodoFinanciero cambios = buildPeriodo(null, "Mayo", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        cambios.setDescripcion("Periodo reemplazado");
+        cambios.setTipo("Mensual");
+        cambios.setCerrado(true);
+
+        when(periodoFinancieroRepository.findById(12L)).thenReturn(Optional.of(existente));
+        when(periodoFinancieroRepository.save(existente)).thenReturn(existente);
+
+        PeriodoFinanciero result = service.replace(12L, cambios);
+
+        assertThat(result.getNombre()).isEqualTo("Mayo");
+        assertThat(result.getFechaInicio()).isEqualTo(LocalDate.of(2024, 5, 1));
+        assertThat(result.getFechaFin()).isEqualTo(LocalDate.of(2024, 5, 31));
+        assertThat(result.getDescripcion()).isEqualTo("Periodo reemplazado");
+        assertThat(result.getTipo()).isEqualTo("Mensual");
+        assertThat(result.getCerrado()).isTrue();
+        verify(periodoFinancieroRepository).save(existente);
+    }
+
+    @Test
+    void updateShouldApplyOnlyProvidedFields() {
+        PeriodoFinanciero existente = buildPeriodo(20L, "Junio", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 30));
+        existente.setDescripcion("Descripcion original");
+        existente.setTipo("Mensual");
+
+        PeriodoFinanciero cambios = new PeriodoFinanciero();
+        cambios.setNombre("Junio actualizado");
+        cambios.setDescripcion("Descripcion nueva");
+
+        when(periodoFinancieroRepository.findById(20L)).thenReturn(Optional.of(existente));
+        when(periodoFinancieroRepository.save(existente)).thenReturn(existente);
+
+        PeriodoFinanciero result = service.update(20L, cambios);
+
+        assertThat(result.getNombre()).isEqualTo("Junio actualizado");
+        assertThat(result.getDescripcion()).isEqualTo("Descripcion nueva");
+        assertThat(result.getTipo()).isEqualTo("Mensual");
+        assertThat(result.getFechaInicio()).isEqualTo(LocalDate.of(2024, 6, 1));
+        verify(periodoFinancieroRepository).save(existente);
+    }
+
+    @Test
+    void deleteShouldRemoveExistingPeriodo() {
+        when(periodoFinancieroRepository.existsById(30L)).thenReturn(true);
+
+        service.delete(30L);
+
+        verify(periodoFinancieroRepository).existsById(30L);
+        verify(periodoFinancieroRepository).deleteById(30L);
+    }
+
+    @Test
+    void deleteShouldThrowWhenPeriodoDoesNotExist() {
+        when(periodoFinancieroRepository.existsById(40L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.delete(40L))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(periodoFinancieroRepository).existsById(40L);
+        verify(periodoFinancieroRepository, never()).deleteById(40L);
     }
 
     private PeriodoFinanciero buildPeriodo(Long id, String nombre, LocalDate inicio, LocalDate fin) {
