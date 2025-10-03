@@ -2,11 +2,16 @@ package com.ahumadamob.fnanz.controller;
 
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
+import com.ahumadamob.fnanz.dto.response.GastoReservadoCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.GastoReservadoTotalesDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
+import com.ahumadamob.fnanz.enums.TipoFin;
 import com.ahumadamob.fnanz.mapper.PeriodoFinancieroMapper;
 import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -177,6 +182,46 @@ class PeriodoFinancieroControllerTest {
 
         verify(periodoFinancieroService).get(4L);
         verify(periodoFinancieroMapper).toDto(periodo);
+        verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
+    }
+
+    @Test
+    void getResumenReservasShouldReturnAggregatedData() throws Exception {
+        PeriodoFinancieroReservasResumenDto resumen = new PeriodoFinancieroReservasResumenDto(
+                List.of(new GastoReservadoCategoriaResumenDto(
+                        1L,
+                        "Salario",
+                        TipoFin.INGRESO,
+                        1,
+                        new BigDecimal("1200.00"),
+                        new BigDecimal("1100.00")
+                )),
+                new GastoReservadoTotalesDto(new BigDecimal("1200.00"), new BigDecimal("1100.00")),
+                List.of(new GastoReservadoCategoriaResumenDto(
+                        2L,
+                        "Renta",
+                        TipoFin.EGRESO,
+                        1,
+                        new BigDecimal("700.00"),
+                        new BigDecimal("650.00")
+                )),
+                new GastoReservadoTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00")),
+                new GastoReservadoTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00"))
+        );
+
+        when(periodoFinancieroService.obtenerResumenReservas(9L)).thenReturn(resumen);
+
+        mockMvc.perform(get("/api/periodos-financieros/{id}/reservas-resumen", 9L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ingresos", hasSize(1)))
+                .andExpect(jsonPath("$.data.ingresos[0].categoriaNombre").value("Salario"))
+                .andExpect(jsonPath("$.data.totalIngresos.montoReservado").value(1200.00))
+                .andExpect(jsonPath("$.data.egresos", hasSize(1)))
+                .andExpect(jsonPath("$.data.egresos[0].montoAplicado").value(650.00))
+                .andExpect(jsonPath("$.data.totalGeneral.montoReservado").value(500.00))
+                .andExpect(jsonPath("$.data.totalGeneral.montoAplicado").value(450.00));
+
+        verify(periodoFinancieroService).obtenerResumenReservas(9L);
         verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
     }
 
