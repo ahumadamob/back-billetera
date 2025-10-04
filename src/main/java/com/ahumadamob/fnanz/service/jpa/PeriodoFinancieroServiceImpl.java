@@ -49,6 +49,15 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<PeriodoFinanciero> listarParaDropdown(boolean soloAbiertos) {
+        if (soloAbiertos) {
+            return periodoFinancieroRepository.findAllByCerradoFalseOrderByFechaInicioAsc();
+        }
+        return periodoFinancieroRepository.findAllByOrderByFechaInicioAsc();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PeriodoFinanciero get(Long id) {
         return periodoFinancieroRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);

@@ -4,6 +4,7 @@ import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
 import com.ahumadamob.fnanz.dto.response.GastoReservadoCategoriaResumenDto;
 import com.ahumadamob.fnanz.dto.response.GastoReservadoTotalesDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
@@ -136,6 +137,49 @@ class PeriodoFinancieroControllerTest {
         Assertions.assertThat(captor.getValue()).isEqualTo(PageRequest.of(0, 10));
         verify(periodoFinancieroMapper).toDto(periodo1);
         verify(periodoFinancieroMapper).toDto(periodo2);
+        verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
+    }
+
+    @Test
+    void dropdownShouldReturnOrderedListWithDefaultFilter() throws Exception {
+        PeriodoFinanciero periodo1 = buildPeriodo(1L, "Abril 2024");
+        PeriodoFinanciero periodo2 = buildPeriodo(2L, "Mayo 2024");
+        when(periodoFinancieroService.listarParaDropdown(false)).thenReturn(List.of(periodo1, periodo2));
+        when(periodoFinancieroMapper.toDropdownDto(periodo1)).thenReturn(
+                new PeriodoFinancieroDropdownDto(1L, "Abril 2024"));
+        when(periodoFinancieroMapper.toDropdownDto(periodo2)).thenReturn(
+                new PeriodoFinancieroDropdownDto(2L, "Mayo 2024"));
+
+        mockMvc.perform(get("/api/periodos-financieros/dropdown"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].id").value(1L))
+                .andExpect(jsonPath("$.data[0].nombre").value("Abril 2024"))
+                .andExpect(jsonPath("$.data[1].id").value(2L))
+                .andExpect(jsonPath("$.data[1].nombre").value("Mayo 2024"));
+
+        verify(periodoFinancieroService).listarParaDropdown(false);
+        verify(periodoFinancieroMapper).toDropdownDto(periodo1);
+        verify(periodoFinancieroMapper).toDropdownDto(periodo2);
+        verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
+    }
+
+    @Test
+    void dropdownShouldAllowFilteringByAbiertos() throws Exception {
+        PeriodoFinanciero periodo = buildPeriodo(3L, "Junio 2024");
+        when(periodoFinancieroService.listarParaDropdown(true)).thenReturn(List.of(periodo));
+        when(periodoFinancieroMapper.toDropdownDto(periodo)).thenReturn(
+                new PeriodoFinancieroDropdownDto(3L, "Junio 2024"));
+
+        mockMvc.perform(get("/api/periodos-financieros/dropdown")
+                        .param("soloAbiertos", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(3L))
+                .andExpect(jsonPath("$.data[0].nombre").value("Junio 2024"));
+
+        verify(periodoFinancieroService).listarParaDropdown(true);
+        verify(periodoFinancieroMapper).toDropdownDto(periodo);
         verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
     }
 

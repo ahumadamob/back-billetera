@@ -3,6 +3,7 @@ package com.ahumadamob.fnanz.controller;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
 import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,6 +61,16 @@ public class PeriodoFinancieroController {
         Page<PeriodoFinanciero> pageResult = periodoFinancieroService.list(pageable);
         Page<PeriodoFinancieroResponseDto> dtoPage = pageResult.map(periodoFinancieroMapper::toDto);
         return page(dtoPage);
+    }
+
+    @GetMapping("/dropdown")
+    public ApiResponseSuccessDto<List<PeriodoFinancieroDropdownDto>> listForDropdown(
+            @RequestParam(name = "soloAbiertos", defaultValue = "false") boolean soloAbiertos) {
+        List<PeriodoFinanciero> periodos = periodoFinancieroService.listarParaDropdown(soloAbiertos);
+        List<PeriodoFinancieroDropdownDto> dtoList = periodos.stream()
+                .map(periodoFinancieroMapper::toDropdownDto)
+                .toList();
+        return ok(dtoList);
     }
 
     @GetMapping("/{id}")
