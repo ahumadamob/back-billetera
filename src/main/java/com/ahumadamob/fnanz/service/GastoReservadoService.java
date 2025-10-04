@@ -1,6 +1,7 @@
 package com.ahumadamob.fnanz.service;
 
 import com.ahumadamob.fnanz.entity.GastoReservado;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,4 +14,5 @@ public interface GastoReservadoService {
     GastoReservado get(Long id);
     GastoReservado update(Long id, GastoReservado gastoReservado);
     void delete(Long id);
+    List<GastoReservado> listByPeriodo(Long periodoId);
 }

@@ -247,6 +247,85 @@ class GastoReservadoControllerTest {
     }
 
     @Test
+    void listByPeriodoShouldReturnFilteredResults() throws Exception {
+        CategoriaFinanciera categoria = new CategoriaFinanciera();
+        categoria.setId(8L);
+        categoria.setNombre("Marketing");
+        categoria.setTipo(TipoFin.EGRESO);
+
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(7L);
+        periodo.setNombre("Julio 2024");
+        periodo.setFechaInicio(LocalDate.of(2024, 7, 1));
+        periodo.setFechaFin(LocalDate.of(2024, 7, 31));
+
+        GastoReservado primero = new GastoReservado();
+        primero.setId(30L);
+        primero.setCategoria(categoria);
+        primero.setPeriodo(periodo);
+
+        GastoReservado segundo = new GastoReservado();
+        segundo.setId(31L);
+        segundo.setCategoria(categoria);
+        segundo.setPeriodo(periodo);
+
+        GastoReservadoResponseDto primeroDto = new GastoReservadoResponseDto(
+                30L,
+                TipoFin.EGRESO,
+                8L,
+                "Marketing",
+                "Campaña",
+                7L,
+                "Julio 2024",
+                LocalDate.of(2024, 7, 1),
+                LocalDate.of(2024, 7, 31),
+                EstadoReserva.RESERVADO,
+                new BigDecimal("1200.00"),
+                BigDecimal.ZERO,
+                null,
+                null,
+                null
+        );
+
+        GastoReservadoResponseDto segundoDto = new GastoReservadoResponseDto(
+                31L,
+                TipoFin.EGRESO,
+                8L,
+                "Marketing",
+                "Eventos",
+                7L,
+                "Julio 2024",
+                LocalDate.of(2024, 7, 1),
+                LocalDate.of(2024, 7, 31),
+                EstadoReserva.APLICADO,
+                new BigDecimal("900.00"),
+                new BigDecimal("450.00"),
+                null,
+                null,
+                null
+        );
+
+        when(gastoReservadoService.listByPeriodo(7L)).thenReturn(List.of(primero, segundo));
+        when(gastoReservadoMapper.toDto(primero)).thenReturn(primeroDto);
+        when(gastoReservadoMapper.toDto(segundo)).thenReturn(segundoDto);
+
+        mockMvc.perform(get("/api/gastos-reservados/periodo/{periodoId}", 7L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].id").value(30L))
+                .andExpect(jsonPath("$.data[0].periodoId").value(7L))
+                .andExpect(jsonPath("$.data[1].id").value(31L))
+                .andExpect(jsonPath("$.data[1].concepto").value("Eventos"))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(gastoReservadoService).listByPeriodo(7L);
+        verify(gastoReservadoMapper).toDto(primero);
+        verify(gastoReservadoMapper).toDto(segundo);
+        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
+    }
+
+    @Test
     void getShouldReturnExistingGasto() throws Exception {
         CategoriaFinanciera categoria = new CategoriaFinanciera();
         categoria.setId(7L);

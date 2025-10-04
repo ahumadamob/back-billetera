@@ -70,6 +70,14 @@ public class GastoReservadoController {
         return page(dtoPage);
     }
 
+    @GetMapping("/periodo/{periodoId}")
+    public ApiResponseSuccessDto<List<GastoReservadoResponseDto>> listByPeriodo(@PathVariable Long periodoId) {
+        List<GastoReservadoResponseDto> gastos = gastoReservadoService.listByPeriodo(periodoId).stream()
+                .map(gastoReservadoMapper::toDto)
+                .toList();
+        return ok(gastos);
+    }
+
     @GetMapping("/{id}")
     public ApiResponseSuccessDto<GastoReservadoResponseDto> get(@PathVariable Long id) {
         GastoReservado gasto = gastoReservadoService.get(id);

@@ -5,6 +5,7 @@ import com.ahumadamob.fnanz.error.ResourceConflictException;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import com.ahumadamob.fnanz.repository.GastoReservadoRepository;
 import com.ahumadamob.fnanz.service.GastoReservadoService;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -48,6 +49,12 @@ public class GastoReservadoServiceImpl implements GastoReservadoService {
             );
         };
         return gastoReservadoRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GastoReservado> listByPeriodo(Long periodoId) {
+        return gastoReservadoRepository.findAllByPeriodoIdOrderByIdAsc(periodoId);
     }
 
     @Override
