@@ -1,6 +1,6 @@
 package com.ahumadamob.fnanz.service;
 
-import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -25,5 +25,5 @@ public interface PeriodoFinancieroService {
 
     void delete(Long id);
 
-    PeriodoFinancieroReservasResumenDto obtenerResumenReservas(Long id);
+    PeriodoFinancieroPartidasResumenDto obtenerResumenPartidas(Long id);
 }

@@ -4,9 +4,9 @@ import com.ahumadamob.fnanz.enums.TipoFin;
 import java.math.BigDecimal;
 
 /**
- * Proyección para obtener los totales de reservas agrupados por categoría.
+ * Proyección para obtener los totales de partidas presupuestarias agrupados por categoría.
  */
-public interface GastoReservadoCategoriaResumenProjection {
+public interface PartidaPresupuestariaCategoriaResumenProjection {
 
     Long getCategoriaId();
 

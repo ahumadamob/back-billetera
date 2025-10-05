@@ -1,14 +1,14 @@
 package com.ahumadamob.fnanz.service.jpa;
 
-import com.ahumadamob.fnanz.dto.response.GastoReservadoCategoriaResumenDto;
-import com.ahumadamob.fnanz.dto.response.GastoReservadoTotalesDto;
-import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaTotalesDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import com.ahumadamob.fnanz.enums.TipoFin;
-import com.ahumadamob.fnanz.repository.GastoReservadoRepository;
+import com.ahumadamob.fnanz.repository.PartidaPresupuestariaRepository;
 import com.ahumadamob.fnanz.repository.PeriodoFinancieroRepository;
-import com.ahumadamob.fnanz.repository.projection.GastoReservadoCategoriaResumenProjection;
+import com.ahumadamob.fnanz.repository.projection.PartidaPresupuestariaCategoriaResumenProjection;
 import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,12 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
 
     private final PeriodoFinancieroRepository periodoFinancieroRepository;
-    private final GastoReservadoRepository gastoReservadoRepository;
+    private final PartidaPresupuestariaRepository partidaPresupuestariaRepository;
 
     public PeriodoFinancieroServiceImpl(PeriodoFinancieroRepository periodoFinancieroRepository,
-                                        GastoReservadoRepository gastoReservadoRepository) {
+                                        PartidaPresupuestariaRepository partidaPresupuestariaRepository) {
         this.periodoFinancieroRepository = periodoFinancieroRepository;
-        this.gastoReservadoRepository = gastoReservadoRepository;
+        this.partidaPresupuestariaRepository = partidaPresupuestariaRepository;
     }
 
     @Override
@@ -117,27 +117,27 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
 
     @Override
     @Transactional(readOnly = true)
-    public PeriodoFinancieroReservasResumenDto obtenerResumenReservas(Long id) {
+    public PeriodoFinancieroPartidasResumenDto obtenerResumenPartidas(Long id) {
         if (!periodoFinancieroRepository.existsById(id)) {
             throw new ResourceNotFoundException();
         }
 
-        List<GastoReservadoCategoriaResumenProjection> resumenes =
-                gastoReservadoRepository.sumByPeriodoId(id);
+        List<PartidaPresupuestariaCategoriaResumenProjection> resumenes =
+                partidaPresupuestariaRepository.sumByPeriodoId(id);
 
-        List<GastoReservadoCategoriaResumenDto> ingresos = new ArrayList<>();
-        List<GastoReservadoCategoriaResumenDto> egresos = new ArrayList<>();
+        List<PartidaPresupuestariaCategoriaResumenDto> ingresos = new ArrayList<>();
+        List<PartidaPresupuestariaCategoriaResumenDto> egresos = new ArrayList<>();
 
         BigDecimal totalIngresosReservado = BigDecimal.ZERO;
         BigDecimal totalIngresosAplicado = BigDecimal.ZERO;
         BigDecimal totalEgresosReservado = BigDecimal.ZERO;
         BigDecimal totalEgresosAplicado = BigDecimal.ZERO;
 
-        for (GastoReservadoCategoriaResumenProjection resumen : resumenes) {
+        for (PartidaPresupuestariaCategoriaResumenProjection resumen : resumenes) {
             BigDecimal montoReservado = valueOrZero(resumen.getTotalMontoReservado());
             BigDecimal montoAplicado = valueOrZero(resumen.getTotalMontoAplicado());
 
-            GastoReservadoCategoriaResumenDto dto = new GastoReservadoCategoriaResumenDto(
+            PartidaPresupuestariaCategoriaResumenDto dto = new PartidaPresupuestariaCategoriaResumenDto(
                     resumen.getCategoriaId(),
                     resumen.getCategoriaNombre(),
                     resumen.getTipo(),
@@ -157,23 +157,23 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
             }
         }
 
-        Comparator<GastoReservadoCategoriaResumenDto> comparator = Comparator
-                .comparing(GastoReservadoCategoriaResumenDto::getOrden,
+        Comparator<PartidaPresupuestariaCategoriaResumenDto> comparator = Comparator
+                .comparing(PartidaPresupuestariaCategoriaResumenDto::getOrden,
                         Comparator.nullsLast(Integer::compareTo))
-                .thenComparing(GastoReservadoCategoriaResumenDto::getCategoriaNombre,
+                .thenComparing(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre,
                         String.CASE_INSENSITIVE_ORDER);
         ingresos.sort(comparator);
         egresos.sort(comparator);
 
-        GastoReservadoTotalesDto totalIngresos = new GastoReservadoTotalesDto(
+        PartidaPresupuestariaTotalesDto totalIngresos = new PartidaPresupuestariaTotalesDto(
                 totalIngresosReservado, totalIngresosAplicado);
-        GastoReservadoTotalesDto totalEgresos = new GastoReservadoTotalesDto(
+        PartidaPresupuestariaTotalesDto totalEgresos = new PartidaPresupuestariaTotalesDto(
                 totalEgresosReservado, totalEgresosAplicado);
-        GastoReservadoTotalesDto totalGeneral = new GastoReservadoTotalesDto(
+        PartidaPresupuestariaTotalesDto totalGeneral = new PartidaPresupuestariaTotalesDto(
                 totalIngresosReservado.subtract(totalEgresosReservado),
                 totalIngresosAplicado.subtract(totalEgresosAplicado));
 
-        return new PeriodoFinancieroReservasResumenDto(
+        return new PeriodoFinancieroPartidasResumenDto(
                 ingresos,
                 totalIngresos,
                 egresos,

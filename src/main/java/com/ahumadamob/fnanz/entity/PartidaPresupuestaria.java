@@ -21,14 +21,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Representa una reserva de gasto/ingreso planificado.
+ * Representa una partida presupuestaria planificada.
  */
 @Entity
-@Table(name = "gasto_reservado")
+@Table(name = "partida_presupuestaria")
 @Getter
 @Setter
 @NoArgsConstructor
-public class GastoReservado extends BaseEntity {
+public class PartidaPresupuestaria extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -38,7 +38,7 @@ public class GastoReservado extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_reserva_categoria"))
+            foreignKey = @ForeignKey(name = "fk_partida_categoria"))
     private CategoriaFinanciera categoria;
 
     @Size(max = 120)
@@ -48,7 +48,7 @@ public class GastoReservado extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "periodo_id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_reserva_periodo"))
+            foreignKey = @ForeignKey(name = "fk_partida_periodo"))
     private PeriodoFinanciero periodo;
 
     @NotNull

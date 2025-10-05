@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO para actualizaciones parciales de gastos reservados.
+ * DTO para actualizaciones parciales de partidas presupuestarias.
  */
 @Getter
 @Setter
 @NoArgsConstructor
-public class GastoReservadoPatchDto {
+public class PartidaPresupuestariaPatchDto {
 
     private TipoFin tipo;
 

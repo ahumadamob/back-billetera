@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO para la creación de gastos reservados.
+ * DTO para la creación de partidas presupuestarias.
  */
 @Getter
 @Setter
 @NoArgsConstructor
-public class GastoReservadoCreateDto {
+public class PartidaPresupuestariaCreateDto {
 
     private TipoFin tipo;
 
