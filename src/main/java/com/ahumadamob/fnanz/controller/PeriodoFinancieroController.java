@@ -4,7 +4,7 @@ import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
 import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
-import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.mapper.PeriodoFinancieroMapper;
@@ -79,10 +79,10 @@ public class PeriodoFinancieroController {
         return ok(periodoFinancieroMapper.toDto(periodo));
     }
 
-    @GetMapping("/{id}/reservas-resumen")
-    public ApiResponseSuccessDto<PeriodoFinancieroReservasResumenDto> getResumenReservas(
+    @GetMapping("/{id}/partidas-resumen")
+    public ApiResponseSuccessDto<PeriodoFinancieroPartidasResumenDto> getResumenPartidas(
             @PathVariable Long id) {
-        PeriodoFinancieroReservasResumenDto resumen = periodoFinancieroService.obtenerResumenReservas(id);
+        PeriodoFinancieroPartidasResumenDto resumen = periodoFinancieroService.obtenerResumenPartidas(id);
         return ok(resumen);
     }
 

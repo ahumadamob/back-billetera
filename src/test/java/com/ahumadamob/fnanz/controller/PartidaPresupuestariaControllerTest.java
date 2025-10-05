@@ -1,16 +1,16 @@
 package com.ahumadamob.fnanz.controller;
 
-import com.ahumadamob.fnanz.dto.GastoReservadoCreateDto;
-import com.ahumadamob.fnanz.dto.GastoReservadoPatchDto;
-import com.ahumadamob.fnanz.dto.response.GastoReservadoResponseDto;
+import com.ahumadamob.fnanz.dto.PartidaPresupuestariaCreateDto;
+import com.ahumadamob.fnanz.dto.PartidaPresupuestariaPatchDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaResponseDto;
 import com.ahumadamob.fnanz.entity.CategoriaFinanciera;
-import com.ahumadamob.fnanz.entity.GastoReservado;
+import com.ahumadamob.fnanz.entity.PartidaPresupuestaria;
 import com.ahumadamob.fnanz.enums.EstadoReserva;
 import com.ahumadamob.fnanz.enums.TipoFin;
-import com.ahumadamob.fnanz.mapper.GastoReservadoMapper;
+import com.ahumadamob.fnanz.mapper.PartidaPresupuestariaMapper;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.service.CategoriaFinancieraService;
-import com.ahumadamob.fnanz.service.GastoReservadoService;
+import com.ahumadamob.fnanz.service.PartidaPresupuestariaService;
 import com.ahumadamob.fnanz.service.PeriodoFinancieroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -46,8 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = GastoReservadoController.class)
-class GastoReservadoControllerTest {
+@WebMvcTest(controllers = PartidaPresupuestariaController.class)
+class PartidaPresupuestariaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,20 +56,20 @@ class GastoReservadoControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private GastoReservadoService gastoReservadoService;
+    private PartidaPresupuestariaService partidaPresupuestariaService;
 
     @MockBean
     private CategoriaFinancieraService categoriaFinancieraService;
 
     @MockBean
-    private GastoReservadoMapper gastoReservadoMapper;
+    private PartidaPresupuestariaMapper partidaPresupuestariaMapper;
 
     @MockBean
     private PeriodoFinancieroService periodoFinancieroService;
 
     @Test
     void createShouldReturnCreatedResponseWithLocationHeader() throws Exception {
-        GastoReservadoCreateDto requestDto = new GastoReservadoCreateDto();
+        PartidaPresupuestariaCreateDto requestDto = new PartidaPresupuestariaCreateDto();
         requestDto.setTipo(TipoFin.EGRESO);
         requestDto.setCategoriaId(5L);
         requestDto.setConcepto("Pago consultoría");
@@ -90,14 +90,14 @@ class GastoReservadoControllerTest {
         periodo.setFechaInicio(LocalDate.of(2024, 5, 1));
         periodo.setFechaFin(LocalDate.of(2024, 5, 31));
 
-        GastoReservado entityToCreate = new GastoReservado();
+        PartidaPresupuestaria entityToCreate = new PartidaPresupuestaria();
         entityToCreate.setTipo(TipoFin.EGRESO);
         entityToCreate.setCategoria(categoria);
         entityToCreate.setPeriodo(periodo);
         entityToCreate.setConcepto("Pago consultoría");
 
         LocalDateTime now = LocalDateTime.of(2024, 5, 2, 12, 0);
-        GastoReservado saved = new GastoReservado();
+        PartidaPresupuestaria saved = new PartidaPresupuestaria();
         saved.setId(11L);
         saved.setTipo(TipoFin.EGRESO);
         saved.setCategoria(categoria);
@@ -110,7 +110,7 @@ class GastoReservadoControllerTest {
         saved.setCreatedAt(now);
         saved.setUpdatedAt(now);
 
-        GastoReservadoResponseDto responseDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto responseDto = new PartidaPresupuestariaResponseDto(
                 11L,
                 TipoFin.EGRESO,
                 5L,
@@ -130,17 +130,17 @@ class GastoReservadoControllerTest {
 
         when(categoriaFinancieraService.get(5L)).thenReturn(categoria);
         when(periodoFinancieroService.get(7L)).thenReturn(periodo);
-        when(gastoReservadoMapper.toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria), eq(periodo)))
+        when(partidaPresupuestariaMapper.toEntity(ArgumentMatchers.any(PartidaPresupuestariaCreateDto.class), eq(categoria), eq(periodo)))
                 .thenReturn(entityToCreate);
-        when(gastoReservadoService.create(entityToCreate)).thenReturn(saved);
-        when(gastoReservadoMapper.toDto(saved)).thenReturn(responseDto);
+        when(partidaPresupuestariaService.create(entityToCreate)).thenReturn(saved);
+        when(partidaPresupuestariaMapper.toDto(saved)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/gastos-reservados")
+        mockMvc.perform(post("/api/partidas-presupuestarias")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/api/gastos-reservados/11"))
-                .andExpect(jsonPath("$.message").value("Gasto reservado creado correctamente"))
+                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/api/partidas-presupuestarias/11"))
+                .andExpect(jsonPath("$.message").value("Partida presupuestaria creada correctamente"))
                 .andExpect(jsonPath("$.data.id").value(11L))
                 .andExpect(jsonPath("$.data.tipo").value(TipoFin.EGRESO.name()))
                 .andExpect(jsonPath("$.data.categoriaId").value(5L))
@@ -155,10 +155,10 @@ class GastoReservadoControllerTest {
 
         verify(categoriaFinancieraService).get(5L);
         verify(periodoFinancieroService).get(7L);
-        verify(gastoReservadoMapper).toEntity(ArgumentMatchers.any(GastoReservadoCreateDto.class), eq(categoria), eq(periodo));
-        verify(gastoReservadoService).create(entityToCreate);
-        verify(gastoReservadoMapper).toDto(saved);
-        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
+        verify(partidaPresupuestariaMapper).toEntity(ArgumentMatchers.any(PartidaPresupuestariaCreateDto.class), eq(categoria), eq(periodo));
+        verify(partidaPresupuestariaService).create(entityToCreate);
+        verify(partidaPresupuestariaMapper).toDto(saved);
+        verifyNoMoreInteractions(partidaPresupuestariaService, categoriaFinancieraService, partidaPresupuestariaMapper, periodoFinancieroService);
     }
 
     @Test
@@ -173,17 +173,17 @@ class GastoReservadoControllerTest {
         salarios.setNombre("Salarios");
         salarios.setTipo(TipoFin.INGRESO);
 
-        GastoReservado egreso = new GastoReservado();
+        PartidaPresupuestaria egreso = new PartidaPresupuestaria();
         egreso.setId(20L);
         egreso.setCategoria(servicios);
         egreso.setTipo(TipoFin.EGRESO);
 
-        GastoReservado ingreso = new GastoReservado();
+        PartidaPresupuestaria ingreso = new PartidaPresupuestaria();
         ingreso.setId(21L);
         ingreso.setCategoria(salarios);
         ingreso.setTipo(TipoFin.INGRESO);
 
-        GastoReservadoResponseDto egresoDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto egresoDto = new PartidaPresupuestariaResponseDto(
                 20L,
                 TipoFin.EGRESO,
                 5L,
@@ -201,7 +201,7 @@ class GastoReservadoControllerTest {
                 null
         );
 
-        GastoReservadoResponseDto ingresoDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto ingresoDto = new PartidaPresupuestariaResponseDto(
                 21L,
                 TipoFin.INGRESO,
                 6L,
@@ -219,13 +219,13 @@ class GastoReservadoControllerTest {
                 null
         );
 
-        Page<GastoReservado> page = new PageImpl<>(List.of(egreso, ingreso), PageRequest.of(0, 2), 4);
+        Page<PartidaPresupuestaria> page = new PageImpl<>(List.of(egreso, ingreso), PageRequest.of(0, 2), 4);
 
-        when(gastoReservadoService.list(ArgumentMatchers.isNull(), any(Pageable.class))).thenReturn(page);
-        when(gastoReservadoMapper.toDto(egreso)).thenReturn(egresoDto);
-        when(gastoReservadoMapper.toDto(ingreso)).thenReturn(ingresoDto);
+        when(partidaPresupuestariaService.list(ArgumentMatchers.isNull(), any(Pageable.class))).thenReturn(page);
+        when(partidaPresupuestariaMapper.toDto(egreso)).thenReturn(egresoDto);
+        when(partidaPresupuestariaMapper.toDto(ingreso)).thenReturn(ingresoDto);
 
-        mockMvc.perform(get("/api/gastos-reservados")
+        mockMvc.perform(get("/api/partidas-presupuestarias")
                         .param("page", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -240,10 +240,10 @@ class GastoReservadoControllerTest {
                 .andExpect(jsonPath("$.data[1].tipo").value(TipoFin.INGRESO.name()))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        verify(gastoReservadoService).list(ArgumentMatchers.isNull(), any(Pageable.class));
-        verify(gastoReservadoMapper).toDto(egreso);
-        verify(gastoReservadoMapper).toDto(ingreso);
-        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
+        verify(partidaPresupuestariaService).list(ArgumentMatchers.isNull(), any(Pageable.class));
+        verify(partidaPresupuestariaMapper).toDto(egreso);
+        verify(partidaPresupuestariaMapper).toDto(ingreso);
+        verifyNoMoreInteractions(partidaPresupuestariaService, partidaPresupuestariaMapper, categoriaFinancieraService, periodoFinancieroService);
     }
 
     @Test
@@ -259,17 +259,17 @@ class GastoReservadoControllerTest {
         periodo.setFechaInicio(LocalDate.of(2024, 7, 1));
         periodo.setFechaFin(LocalDate.of(2024, 7, 31));
 
-        GastoReservado primero = new GastoReservado();
+        PartidaPresupuestaria primero = new PartidaPresupuestaria();
         primero.setId(30L);
         primero.setCategoria(categoria);
         primero.setPeriodo(periodo);
 
-        GastoReservado segundo = new GastoReservado();
+        PartidaPresupuestaria segundo = new PartidaPresupuestaria();
         segundo.setId(31L);
         segundo.setCategoria(categoria);
         segundo.setPeriodo(periodo);
 
-        GastoReservadoResponseDto primeroDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto primeroDto = new PartidaPresupuestariaResponseDto(
                 30L,
                 TipoFin.EGRESO,
                 8L,
@@ -287,7 +287,7 @@ class GastoReservadoControllerTest {
                 null
         );
 
-        GastoReservadoResponseDto segundoDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto segundoDto = new PartidaPresupuestariaResponseDto(
                 31L,
                 TipoFin.EGRESO,
                 8L,
@@ -305,11 +305,11 @@ class GastoReservadoControllerTest {
                 null
         );
 
-        when(gastoReservadoService.listByPeriodo(7L)).thenReturn(List.of(primero, segundo));
-        when(gastoReservadoMapper.toDto(primero)).thenReturn(primeroDto);
-        when(gastoReservadoMapper.toDto(segundo)).thenReturn(segundoDto);
+        when(partidaPresupuestariaService.listByPeriodo(7L)).thenReturn(List.of(primero, segundo));
+        when(partidaPresupuestariaMapper.toDto(primero)).thenReturn(primeroDto);
+        when(partidaPresupuestariaMapper.toDto(segundo)).thenReturn(segundoDto);
 
-        mockMvc.perform(get("/api/gastos-reservados/periodo/{periodoId}", 7L))
+        mockMvc.perform(get("/api/partidas-presupuestarias/periodo/{periodoId}", 7L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.data", hasSize(2)))
@@ -319,10 +319,10 @@ class GastoReservadoControllerTest {
                 .andExpect(jsonPath("$.data[1].concepto").value("Eventos"))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        verify(gastoReservadoService).listByPeriodo(7L);
-        verify(gastoReservadoMapper).toDto(primero);
-        verify(gastoReservadoMapper).toDto(segundo);
-        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
+        verify(partidaPresupuestariaService).listByPeriodo(7L);
+        verify(partidaPresupuestariaMapper).toDto(primero);
+        verify(partidaPresupuestariaMapper).toDto(segundo);
+        verifyNoMoreInteractions(partidaPresupuestariaService, partidaPresupuestariaMapper, categoriaFinancieraService, periodoFinancieroService);
     }
 
     @Test
@@ -332,7 +332,7 @@ class GastoReservadoControllerTest {
         categoria.setNombre("Honorarios");
         categoria.setTipo(TipoFin.EGRESO);
 
-        GastoReservado gasto = new GastoReservado();
+        PartidaPresupuestaria gasto = new PartidaPresupuestaria();
         gasto.setId(30L);
         gasto.setCategoria(categoria);
         gasto.setTipo(TipoFin.EGRESO);
@@ -343,7 +343,7 @@ class GastoReservadoControllerTest {
         periodo.setFechaInicio(LocalDate.of(2024, 6, 1));
         periodo.setFechaFin(LocalDate.of(2024, 6, 30));
 
-        GastoReservadoResponseDto dto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto dto = new PartidaPresupuestariaResponseDto(
                 30L,
                 TipoFin.EGRESO,
                 7L,
@@ -361,23 +361,23 @@ class GastoReservadoControllerTest {
                 null
         );
 
-        when(gastoReservadoService.get(30L)).thenReturn(gasto);
-        when(gastoReservadoMapper.toDto(gasto)).thenReturn(dto);
+        when(partidaPresupuestariaService.get(30L)).thenReturn(gasto);
+        when(partidaPresupuestariaMapper.toDto(gasto)).thenReturn(dto);
 
-        mockMvc.perform(get("/api/gastos-reservados/{id}", 30L))
+        mockMvc.perform(get("/api/partidas-presupuestarias/{id}", 30L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(30L))
                 .andExpect(jsonPath("$.data.categoriaNombre").value("Honorarios"))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        verify(gastoReservadoService).get(30L);
-        verify(gastoReservadoMapper).toDto(gasto);
-        verifyNoMoreInteractions(gastoReservadoService, gastoReservadoMapper, categoriaFinancieraService, periodoFinancieroService);
+        verify(partidaPresupuestariaService).get(30L);
+        verify(partidaPresupuestariaMapper).toDto(gasto);
+        verifyNoMoreInteractions(partidaPresupuestariaService, partidaPresupuestariaMapper, categoriaFinancieraService, periodoFinancieroService);
     }
 
     @Test
     void updateShouldReturnUpdatedGasto() throws Exception {
-        GastoReservadoPatchDto patchDto = new GastoReservadoPatchDto();
+        PartidaPresupuestariaPatchDto patchDto = new PartidaPresupuestariaPatchDto();
         patchDto.setCategoriaId(9L);
         patchDto.setConcepto("Actualizado");
         patchDto.setPeriodoId(12L);
@@ -394,12 +394,12 @@ class GastoReservadoControllerTest {
         periodo.setFechaInicio(LocalDate.of(2024, 7, 1));
         periodo.setFechaFin(LocalDate.of(2024, 7, 31));
 
-        GastoReservado cambios = new GastoReservado();
+        PartidaPresupuestaria cambios = new PartidaPresupuestaria();
         cambios.setCategoria(categoria);
         cambios.setConcepto("Actualizado");
         cambios.setPeriodo(periodo);
 
-        GastoReservado updated = new GastoReservado();
+        PartidaPresupuestaria updated = new PartidaPresupuestaria();
         updated.setId(40L);
         updated.setCategoria(categoria);
         updated.setTipo(TipoFin.EGRESO);
@@ -407,7 +407,7 @@ class GastoReservadoControllerTest {
         updated.setPeriodo(periodo);
         updated.setMontoReservado(new BigDecimal("1800.00"));
 
-        GastoReservadoResponseDto responseDto = new GastoReservadoResponseDto(
+        PartidaPresupuestariaResponseDto responseDto = new PartidaPresupuestariaResponseDto(
                 40L,
                 TipoFin.EGRESO,
                 9L,
@@ -427,12 +427,12 @@ class GastoReservadoControllerTest {
 
         when(categoriaFinancieraService.get(9L)).thenReturn(categoria);
         when(periodoFinancieroService.get(12L)).thenReturn(periodo);
-        when(gastoReservadoMapper.toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria), eq(periodo)))
+        when(partidaPresupuestariaMapper.toPartialEntity(ArgumentMatchers.any(PartidaPresupuestariaPatchDto.class), eq(categoria), eq(periodo)))
                 .thenReturn(cambios);
-        when(gastoReservadoService.update(40L, cambios)).thenReturn(updated);
-        when(gastoReservadoMapper.toDto(updated)).thenReturn(responseDto);
+        when(partidaPresupuestariaService.update(40L, cambios)).thenReturn(updated);
+        when(partidaPresupuestariaMapper.toDto(updated)).thenReturn(responseDto);
 
-        mockMvc.perform(patch("/api/gastos-reservados/{id}", 40L)
+        mockMvc.perform(patch("/api/partidas-presupuestarias/{id}", 40L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patchDto)))
                 .andExpect(status().isOk())
@@ -444,21 +444,21 @@ class GastoReservadoControllerTest {
 
         verify(categoriaFinancieraService).get(9L);
         verify(periodoFinancieroService).get(12L);
-        verify(gastoReservadoMapper).toPartialEntity(ArgumentMatchers.any(GastoReservadoPatchDto.class), eq(categoria), eq(periodo));
-        verify(gastoReservadoService).update(40L, cambios);
-        verify(gastoReservadoMapper).toDto(updated);
-        verifyNoMoreInteractions(gastoReservadoService, categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
+        verify(partidaPresupuestariaMapper).toPartialEntity(ArgumentMatchers.any(PartidaPresupuestariaPatchDto.class), eq(categoria), eq(periodo));
+        verify(partidaPresupuestariaService).update(40L, cambios);
+        verify(partidaPresupuestariaMapper).toDto(updated);
+        verifyNoMoreInteractions(partidaPresupuestariaService, categoriaFinancieraService, partidaPresupuestariaMapper, periodoFinancieroService);
     }
 
     @Test
     void deleteShouldReturnNoContent() throws Exception {
-        doNothing().when(gastoReservadoService).delete(55L);
+        doNothing().when(partidaPresupuestariaService).delete(55L);
 
-        mockMvc.perform(delete("/api/gastos-reservados/{id}", 55L))
+        mockMvc.perform(delete("/api/partidas-presupuestarias/{id}", 55L))
                 .andExpect(status().isNoContent());
 
-        verify(gastoReservadoService).delete(55L);
-        verifyNoMoreInteractions(gastoReservadoService);
-        verifyNoMoreInteractions(categoriaFinancieraService, gastoReservadoMapper, periodoFinancieroService);
+        verify(partidaPresupuestariaService).delete(55L);
+        verifyNoMoreInteractions(partidaPresupuestariaService);
+        verifyNoMoreInteractions(categoriaFinancieraService, partidaPresupuestariaMapper, periodoFinancieroService);
 }
 }

@@ -1,7 +1,7 @@
 package com.ahumadamob.fnanz.repository;
 
-import com.ahumadamob.fnanz.entity.GastoReservado;
-import com.ahumadamob.fnanz.repository.projection.GastoReservadoCategoriaResumenProjection;
+import com.ahumadamob.fnanz.entity.PartidaPresupuestaria;
+import com.ahumadamob.fnanz.repository.projection.PartidaPresupuestariaCategoriaResumenProjection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -9,10 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Repositorio JPA para la entidad {@link GastoReservado}.
+ * Repositorio JPA para la entidad {@link PartidaPresupuestaria}.
  */
-public interface GastoReservadoRepository extends JpaRepository<GastoReservado, Long>,
-        JpaSpecificationExecutor<GastoReservado> {
+public interface PartidaPresupuestariaRepository extends JpaRepository<PartidaPresupuestaria, Long>,
+        JpaSpecificationExecutor<PartidaPresupuestaria> {
 
     @Query("""
             select gr.categoria.id as categoriaId,
@@ -21,11 +21,11 @@ public interface GastoReservadoRepository extends JpaRepository<GastoReservado, 
                    gr.categoria.orden as categoriaOrden,
                    coalesce(sum(gr.montoReservado), 0) as totalMontoReservado,
                    coalesce(sum(gr.montoAplicado), 0) as totalMontoAplicado
-            from GastoReservado gr
+            from PartidaPresupuestaria gr
             where gr.periodo.id = :periodoId
             group by gr.categoria.id, gr.categoria.nombre, gr.categoria.tipo, gr.categoria.orden
             """)
-    List<GastoReservadoCategoriaResumenProjection> sumByPeriodoId(@Param("periodoId") Long periodoId);
+    List<PartidaPresupuestariaCategoriaResumenProjection> sumByPeriodoId(@Param("periodoId") Long periodoId);
 
-    List<GastoReservado> findAllByPeriodoIdOrderByIdAsc(Long periodoId);
+    List<PartidaPresupuestaria> findAllByPeriodoIdOrderByIdAsc(Long periodoId);
 }

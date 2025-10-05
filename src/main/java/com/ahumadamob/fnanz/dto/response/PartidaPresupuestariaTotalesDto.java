@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GastoReservadoTotalesDto {
+public class PartidaPresupuestariaTotalesDto {
 
     private BigDecimal montoReservado;
 

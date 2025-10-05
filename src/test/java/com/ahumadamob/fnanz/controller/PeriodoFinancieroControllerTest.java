@@ -2,10 +2,10 @@ package com.ahumadamob.fnanz.controller;
 
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
-import com.ahumadamob.fnanz.dto.response.GastoReservadoCategoriaResumenDto;
-import com.ahumadamob.fnanz.dto.response.GastoReservadoTotalesDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaTotalesDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
-import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import com.ahumadamob.fnanz.enums.TipoFin;
@@ -230,9 +230,9 @@ class PeriodoFinancieroControllerTest {
     }
 
     @Test
-    void getResumenReservasShouldReturnAggregatedData() throws Exception {
-        PeriodoFinancieroReservasResumenDto resumen = new PeriodoFinancieroReservasResumenDto(
-                List.of(new GastoReservadoCategoriaResumenDto(
+    void getResumenPartidasShouldReturnAggregatedData() throws Exception {
+        PeriodoFinancieroPartidasResumenDto resumen = new PeriodoFinancieroPartidasResumenDto(
+                List.of(new PartidaPresupuestariaCategoriaResumenDto(
                         1L,
                         "Salario",
                         TipoFin.INGRESO,
@@ -240,8 +240,8 @@ class PeriodoFinancieroControllerTest {
                         new BigDecimal("1200.00"),
                         new BigDecimal("1100.00")
                 )),
-                new GastoReservadoTotalesDto(new BigDecimal("1200.00"), new BigDecimal("1100.00")),
-                List.of(new GastoReservadoCategoriaResumenDto(
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("1200.00"), new BigDecimal("1100.00")),
+                List.of(new PartidaPresupuestariaCategoriaResumenDto(
                         2L,
                         "Renta",
                         TipoFin.EGRESO,
@@ -249,13 +249,13 @@ class PeriodoFinancieroControllerTest {
                         new BigDecimal("700.00"),
                         new BigDecimal("650.00")
                 )),
-                new GastoReservadoTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00")),
-                new GastoReservadoTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00"))
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00")),
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00"))
         );
 
-        when(periodoFinancieroService.obtenerResumenReservas(9L)).thenReturn(resumen);
+        when(periodoFinancieroService.obtenerResumenPartidas(9L)).thenReturn(resumen);
 
-        mockMvc.perform(get("/api/periodos-financieros/{id}/reservas-resumen", 9L))
+        mockMvc.perform(get("/api/periodos-financieros/{id}/partidas-resumen", 9L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.ingresos", hasSize(1)))
                 .andExpect(jsonPath("$.data.ingresos[0].categoriaNombre").value("Salario"))
@@ -265,7 +265,7 @@ class PeriodoFinancieroControllerTest {
                 .andExpect(jsonPath("$.data.totalGeneral.montoReservado").value(500.00))
                 .andExpect(jsonPath("$.data.totalGeneral.montoAplicado").value(450.00));
 
-        verify(periodoFinancieroService).obtenerResumenReservas(9L);
+        verify(periodoFinancieroService).obtenerResumenPartidas(9L);
         verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
     }
 

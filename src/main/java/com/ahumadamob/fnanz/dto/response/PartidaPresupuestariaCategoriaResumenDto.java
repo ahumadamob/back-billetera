@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GastoReservadoCategoriaResumenDto {
+public class PartidaPresupuestariaCategoriaResumenDto {
 
     private Long categoriaId;
 

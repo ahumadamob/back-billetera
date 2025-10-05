@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO de lectura de gastos reservados.
+ * DTO de lectura de partidas presupuestarias.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GastoReservadoResponseDto {
+public class PartidaPresupuestariaResponseDto {
 
     private Long id;
 
