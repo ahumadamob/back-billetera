@@ -82,6 +82,33 @@ class PeriodoFinancieroServiceImplTest {
     }
 
     @Test
+    void listarParaDropdownShouldReturnAllOrderedWhenSoloAbiertosIsFalse() {
+        List<PeriodoFinanciero> periodos = List.of(
+                buildPeriodo(1L, "Enero", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)),
+                buildPeriodo(2L, "Febrero", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 29))
+        );
+        when(periodoFinancieroRepository.findAllByOrderByFechaInicioAsc()).thenReturn(periodos);
+
+        List<PeriodoFinanciero> result = service.listarParaDropdown(false);
+
+        assertThat(result).isEqualTo(periodos);
+        verify(periodoFinancieroRepository).findAllByOrderByFechaInicioAsc();
+    }
+
+    @Test
+    void listarParaDropdownShouldFilterClosedWhenSoloAbiertosIsTrue() {
+        List<PeriodoFinanciero> abiertos = List.of(
+                buildPeriodo(3L, "Marzo", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31))
+        );
+        when(periodoFinancieroRepository.findAllByCerradoFalseOrderByFechaInicioAsc()).thenReturn(abiertos);
+
+        List<PeriodoFinanciero> result = service.listarParaDropdown(true);
+
+        assertThat(result).isEqualTo(abiertos);
+        verify(periodoFinancieroRepository).findAllByCerradoFalseOrderByFechaInicioAsc();
+    }
+
+    @Test
     void getShouldThrowWhenPeriodoDoesNotExist() {
         when(periodoFinancieroRepository.findById(9L)).thenReturn(Optional.empty());
 

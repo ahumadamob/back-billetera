@@ -2,6 +2,7 @@ package com.ahumadamob.fnanz.mapper;
 
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
+import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroResponseDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
 import java.util.Optional;
@@ -63,6 +64,16 @@ public class PeriodoFinancieroMapper {
                 periodo.getCerrado(),
                 periodo.getCreatedAt(),
                 periodo.getUpdatedAt()
+        );
+    }
+
+    public PeriodoFinancieroDropdownDto toDropdownDto(PeriodoFinanciero periodo) {
+        if (periodo == null) {
+            return null;
+        }
+        return new PeriodoFinancieroDropdownDto(
+                periodo.getId(),
+                periodo.getNombre()
         );
     }
 }

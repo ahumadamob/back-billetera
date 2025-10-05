@@ -26,4 +26,6 @@ public interface GastoReservadoRepository extends JpaRepository<GastoReservado, 
             group by gr.categoria.id, gr.categoria.nombre, gr.categoria.tipo, gr.categoria.orden
             """)
     List<GastoReservadoCategoriaResumenProjection> sumByPeriodoId(@Param("periodoId") Long periodoId);
+
+    List<GastoReservado> findAllByPeriodoIdOrderByIdAsc(Long periodoId);
 }

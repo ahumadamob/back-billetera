@@ -2,6 +2,7 @@ package com.ahumadamob.fnanz.service;
 
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroReservasResumenDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,6 +14,8 @@ public interface PeriodoFinancieroService {
     PeriodoFinanciero create(PeriodoFinanciero periodoFinanciero);
 
     Page<PeriodoFinanciero> list(Pageable pageable);
+
+    List<PeriodoFinanciero> listarParaDropdown(boolean soloAbiertos);
 
     PeriodoFinanciero get(Long id);
 

@@ -197,6 +197,22 @@ class GastoReservadoServiceImplTest {
         assertThat(captor.getValue()).isNotNull();
     }
 
+    @Test
+    void listByPeriodoShouldDelegateToRepository() {
+        CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
+        PeriodoFinanciero periodo = buildPeriodo(3L, LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 31));
+        GastoReservado primero = buildGasto(10L, TipoFin.EGRESO, categoria, periodo);
+        GastoReservado segundo = buildGasto(12L, TipoFin.EGRESO, categoria, periodo);
+        List<GastoReservado> expected = List.of(primero, segundo);
+
+        when(gastoReservadoRepository.findAllByPeriodoIdOrderByIdAsc(3L)).thenReturn(expected);
+
+        List<GastoReservado> result = service.listByPeriodo(3L);
+
+        assertThat(result).isSameAs(expected);
+        verify(gastoReservadoRepository).findAllByPeriodoIdOrderByIdAsc(3L);
+    }
+
     private CategoriaFinanciera buildCategoria(Long id, String nombre, TipoFin tipo) {
         CategoriaFinanciera categoria = new CategoriaFinanciera();
         categoria.setId(id);
