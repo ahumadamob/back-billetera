@@ -1,5 +1,6 @@
 package com.ahumadamob.fnanz.controller;
 
+import com.ahumadamob.fnanz.dto.PartidaPresupuestariaAplicarDto;
 import com.ahumadamob.fnanz.dto.PartidaPresupuestariaCreateDto;
 import com.ahumadamob.fnanz.dto.PartidaPresupuestariaPatchDto;
 import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaResponseDto;
@@ -451,6 +452,65 @@ class PartidaPresupuestariaControllerTest {
     }
 
     @Test
+    void applyShouldSetMontoAplicadoAndReturnUpdatedPartida() throws Exception {
+        PartidaPresupuestariaAplicarDto requestDto = new PartidaPresupuestariaAplicarDto();
+        requestDto.setMontoAplicado(new BigDecimal("1200.00"));
+
+        CategoriaFinanciera categoria = new CategoriaFinanciera();
+        categoria.setId(5L);
+        categoria.setNombre("Servicios");
+        categoria.setTipo(TipoFin.EGRESO);
+
+        PeriodoFinanciero periodo = new PeriodoFinanciero();
+        periodo.setId(7L);
+        periodo.setNombre("Mayo 2024");
+        periodo.setFechaInicio(LocalDate.of(2024, 5, 1));
+        periodo.setFechaFin(LocalDate.of(2024, 5, 31));
+
+        PartidaPresupuestaria partidaAplicada = new PartidaPresupuestaria();
+        partidaAplicada.setId(15L);
+        partidaAplicada.setTipo(TipoFin.EGRESO);
+        partidaAplicada.setCategoria(categoria);
+        partidaAplicada.setPeriodo(periodo);
+        partidaAplicada.setEstado(EstadoReserva.APLICADO);
+        partidaAplicada.setMontoReservado(new BigDecimal("1500.00"));
+        partidaAplicada.setMontoAplicado(new BigDecimal("1200.00"));
+
+        PartidaPresupuestariaResponseDto responseDto = new PartidaPresupuestariaResponseDto(
+                15L,
+                TipoFin.EGRESO,
+                5L,
+                "Servicios",
+                "Pago consultoría",
+                7L,
+                "Mayo 2024",
+                LocalDate.of(2024, 5, 1),
+                LocalDate.of(2024, 5, 31),
+                EstadoReserva.APLICADO,
+                new BigDecimal("1500.00"),
+                new BigDecimal("1200.00"),
+                "Mensual",
+                LocalDateTime.of(2024, 5, 3, 10, 0),
+                LocalDateTime.of(2024, 5, 4, 10, 0)
+        );
+
+        when(partidaPresupuestariaService.applyMonto(15L, new BigDecimal("1200.00"))).thenReturn(partidaAplicada);
+        when(partidaPresupuestariaMapper.toDto(partidaAplicada)).thenReturn(responseDto);
+
+        mockMvc.perform(patch("/api/partidas-presupuestarias/{id}/aplicar", 15L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(15L))
+                .andExpect(jsonPath("$.data.estado").value(EstadoReserva.APLICADO.name()))
+                .andExpect(jsonPath("$.data.montoAplicado").value(1200.00));
+
+        verify(partidaPresupuestariaService).applyMonto(15L, new BigDecimal("1200.00"));
+        verify(partidaPresupuestariaMapper).toDto(partidaAplicada);
+        verifyNoMoreInteractions(partidaPresupuestariaService, partidaPresupuestariaMapper);
+    }
+
+    @Test
     void deleteShouldReturnNoContent() throws Exception {
         doNothing().when(partidaPresupuestariaService).delete(55L);
 
@@ -460,5 +520,5 @@ class PartidaPresupuestariaControllerTest {
         verify(partidaPresupuestariaService).delete(55L);
         verifyNoMoreInteractions(partidaPresupuestariaService);
         verifyNoMoreInteractions(categoriaFinancieraService, partidaPresupuestariaMapper, periodoFinancieroService);
-}
+    }
 }
