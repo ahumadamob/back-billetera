@@ -153,6 +153,46 @@ class PartidaPresupuestariaServiceImplTest {
     }
 
     @Test
+    void applyMontoShouldUpdateMontoAplicadoAndEstado() {
+        CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        PartidaPresupuestaria partida = buildPartida(10L, TipoFin.EGRESO, categoria, periodo);
+        partida.setEstado(EstadoReserva.RESERVADO);
+        partida.setMontoReservado(new BigDecimal("1500.00"));
+
+        when(partidaPresupuestariaRepository.findById(10L)).thenReturn(Optional.of(partida));
+        when(partidaPresupuestariaRepository.save(partida)).thenAnswer(invocation -> invocation.getArgument(0));
+
+        PartidaPresupuestaria result = service.applyMonto(10L, new BigDecimal("1200.00"));
+
+        assertThat(result.getMontoAplicado()).isEqualByComparingTo("1200.00");
+        assertThat(result.getEstado()).isEqualTo(EstadoReserva.APLICADO);
+        verify(partidaPresupuestariaRepository).save(partida);
+    }
+
+    @Test
+    void applyMontoShouldThrowConflictWhenMontoExceedsReservado() {
+        CategoriaFinanciera categoria = buildCategoria(1L, "Servicios", TipoFin.EGRESO);
+        PeriodoFinanciero periodo = buildPeriodo(1L, LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31));
+        PartidaPresupuestaria partida = buildPartida(10L, TipoFin.EGRESO, categoria, periodo);
+        partida.setMontoReservado(new BigDecimal("1000.00"));
+
+        when(partidaPresupuestariaRepository.findById(10L)).thenReturn(Optional.of(partida));
+
+        assertThatThrownBy(() -> service.applyMonto(10L, new BigDecimal("1200.00")))
+                .isInstanceOf(ResourceConflictException.class);
+        verify(partidaPresupuestariaRepository, never()).save(any());
+    }
+
+    @Test
+    void applyMontoShouldThrowWhenPartidaDoesNotExist() {
+        when(partidaPresupuestariaRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.applyMonto(10L, new BigDecimal("100.00")))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
     void deleteShouldRemovePartidaWhenExists() {
         when(partidaPresupuestariaRepository.existsById(3L)).thenReturn(true);
 

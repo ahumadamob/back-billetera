@@ -1,5 +1,6 @@
 package com.ahumadamob.fnanz.controller;
 
+import com.ahumadamob.fnanz.dto.PartidaPresupuestariaAplicarDto;
 import com.ahumadamob.fnanz.dto.PartidaPresupuestariaCreateDto;
 import com.ahumadamob.fnanz.dto.PartidaPresupuestariaPatchDto;
 import com.ahumadamob.fnanz.dto.response.ApiResponseSuccessDto;
@@ -97,6 +98,13 @@ public class PartidaPresupuestariaController {
         PartidaPresupuestaria cambios = partidaPresupuestariaMapper.toPartialEntity(dto, categoria, periodo);
         PartidaPresupuestaria updated = partidaPresupuestariaService.update(id, cambios);
         return ok(partidaPresupuestariaMapper.toDto(updated));
+    }
+
+    @PatchMapping("/{id}/aplicar")
+    public ApiResponseSuccessDto<PartidaPresupuestariaResponseDto> apply(@PathVariable Long id,
+            @Validated @RequestBody PartidaPresupuestariaAplicarDto dto) {
+        PartidaPresupuestaria aplicada = partidaPresupuestariaService.applyMonto(id, dto.getMontoAplicado());
+        return ok(partidaPresupuestariaMapper.toDto(aplicada));
     }
 
     @DeleteMapping("/{id}")

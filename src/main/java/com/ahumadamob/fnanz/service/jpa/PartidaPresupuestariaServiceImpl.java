@@ -1,10 +1,12 @@
 package com.ahumadamob.fnanz.service.jpa;
 
 import com.ahumadamob.fnanz.entity.PartidaPresupuestaria;
+import com.ahumadamob.fnanz.enums.EstadoReserva;
 import com.ahumadamob.fnanz.error.ResourceConflictException;
 import com.ahumadamob.fnanz.error.ResourceNotFoundException;
 import com.ahumadamob.fnanz.repository.PartidaPresupuestariaRepository;
 import com.ahumadamob.fnanz.service.PartidaPresupuestariaService;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -95,6 +97,27 @@ public class PartidaPresupuestariaServiceImpl implements PartidaPresupuestariaSe
         }
 
         validateCategoriaTipoYPeriodo(partida);
+        return partidaPresupuestariaRepository.save(partida);
+    }
+
+    @Override
+    public PartidaPresupuestaria applyMonto(Long id, BigDecimal montoAplicado) {
+        PartidaPresupuestaria partida = partidaPresupuestariaRepository.findById(id)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        if (montoAplicado == null) {
+            throw new ResourceConflictException("montoAplicado", "El monto aplicado es obligatorio");
+        }
+        if (montoAplicado.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResourceConflictException("montoAplicado", "El monto aplicado debe ser mayor o igual a cero");
+        }
+        BigDecimal montoReservado = partida.getMontoReservado();
+        if (montoReservado != null && montoAplicado.compareTo(montoReservado) > 0) {
+            throw new ResourceConflictException("montoAplicado", "El monto aplicado no puede superar el monto reservado");
+        }
+
+        partida.setMontoAplicado(montoAplicado);
+        partida.setEstado(EstadoReserva.APLICADO);
         return partidaPresupuestariaRepository.save(partida);
     }
 
