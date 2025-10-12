@@ -1,5 +1,6 @@
 package com.ahumadamob.fnanz.dto.response;
 
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,5 +25,9 @@ public class PeriodoFinancieroPartidasResumenDto {
     private PartidaPresupuestariaTotalesDto totalEgresos;
 
     private PartidaPresupuestariaTotalesDto totalGeneral;
+
+    private BigDecimal netoReservado;
+
+    private BigDecimal netoAplicado;
 }
 

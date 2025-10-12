@@ -212,6 +212,10 @@ class PeriodoFinancieroServiceImplTest {
                 .isEqualByComparingTo(new BigDecimal("900.00"));
         assertThat(resumen.getTotalGeneral().getMontoAplicado())
                 .isEqualByComparingTo(new BigDecimal("-130.00"));
+        assertThat(resumen.getNetoReservado())
+                .isEqualByComparingTo(new BigDecimal("900.00"));
+        assertThat(resumen.getNetoAplicado())
+                .isEqualByComparingTo(new BigDecimal("-130.00"));
 
         verify(periodoFinancieroRepository).existsById(5L);
         verify(partidaPresupuestariaRepository).sumByPeriodoId(5L);

@@ -169,16 +169,20 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
                 totalIngresosReservado, totalIngresosAplicado);
         PartidaPresupuestariaTotalesDto totalEgresos = new PartidaPresupuestariaTotalesDto(
                 totalEgresosReservado, totalEgresosAplicado);
+        BigDecimal netoReservado = totalIngresosReservado.subtract(totalEgresosReservado);
+        BigDecimal netoAplicado = totalIngresosAplicado.subtract(totalEgresosAplicado);
         PartidaPresupuestariaTotalesDto totalGeneral = new PartidaPresupuestariaTotalesDto(
-                totalIngresosReservado.subtract(totalEgresosReservado),
-                totalIngresosAplicado.subtract(totalEgresosAplicado));
+                netoReservado,
+                netoAplicado);
 
         return new PeriodoFinancieroPartidasResumenDto(
                 ingresos,
                 totalIngresos,
                 egresos,
                 totalEgresos,
-                totalGeneral
+                totalGeneral,
+                netoReservado,
+                netoAplicado
         );
     }
 

@@ -250,7 +250,9 @@ class PeriodoFinancieroControllerTest {
                         new BigDecimal("650.00")
                 )),
                 new PartidaPresupuestariaTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00")),
-                new PartidaPresupuestariaTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00"))
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00")),
+                new BigDecimal("500.00"),
+                new BigDecimal("450.00")
         );
 
         when(periodoFinancieroService.obtenerResumenPartidas(9L)).thenReturn(resumen);
@@ -263,7 +265,9 @@ class PeriodoFinancieroControllerTest {
                 .andExpect(jsonPath("$.data.egresos", hasSize(1)))
                 .andExpect(jsonPath("$.data.egresos[0].montoAplicado").value(650.00))
                 .andExpect(jsonPath("$.data.totalGeneral.montoReservado").value(500.00))
-                .andExpect(jsonPath("$.data.totalGeneral.montoAplicado").value(450.00));
+                .andExpect(jsonPath("$.data.totalGeneral.montoAplicado").value(450.00))
+                .andExpect(jsonPath("$.data.netoReservado").value(500.00))
+                .andExpect(jsonPath("$.data.netoAplicado").value(450.00));
 
         verify(periodoFinancieroService).obtenerResumenPartidas(9L);
         verifyNoMoreInteractions(periodoFinancieroService, periodoFinancieroMapper);
