@@ -198,20 +198,20 @@ class PeriodoFinancieroServiceImplTest {
 
         PeriodoFinancieroPartidasResumenDto resumen = service.obtenerResumenPartidas(5L);
 
-        assertThat(resumen.getIngresos()).extracting(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre)
+        assertThat(resumen.getIngresos().getCategorias())
+                .extracting(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre)
                 .containsExactly("Salario", "Consultoría");
-        assertThat(resumen.getEgresos()).extracting(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre)
-                .containsExactly("Renta");
-        assertThat(resumen.getTotalIngresos().getMontoReservado())
+        assertThat(resumen.getIngresos().getTotales().getMontoReservado())
                 .isEqualByComparingTo(new BigDecimal("1500.00"));
-        assertThat(resumen.getTotalIngresos().getMontoAplicado())
+        assertThat(resumen.getIngresos().getTotales().getMontoAplicado())
                 .isEqualByComparingTo(new BigDecimal("450.00"));
-        assertThat(resumen.getTotalEgresos().getMontoReservado())
+        assertThat(resumen.getEgresos().getCategorias())
+                .extracting(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre)
+                .containsExactly("Renta");
+        assertThat(resumen.getEgresos().getTotales().getMontoReservado())
                 .isEqualByComparingTo(new BigDecimal("600.00"));
-        assertThat(resumen.getTotalGeneral().getMontoReservado())
-                .isEqualByComparingTo(new BigDecimal("900.00"));
-        assertThat(resumen.getTotalGeneral().getMontoAplicado())
-                .isEqualByComparingTo(new BigDecimal("-130.00"));
+        assertThat(resumen.getEgresos().getTotales().getMontoAplicado())
+                .isEqualByComparingTo(new BigDecimal("580.00"));
         assertThat(resumen.getNetoReservado())
                 .isEqualByComparingTo(new BigDecimal("900.00"));
         assertThat(resumen.getNetoAplicado())

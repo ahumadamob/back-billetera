@@ -3,6 +3,7 @@ package com.ahumadamob.fnanz.controller;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroCreateDto;
 import com.ahumadamob.fnanz.dto.PeriodoFinancieroPatchDto;
 import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaResumenDetalleDto;
 import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaTotalesDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroDropdownDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
@@ -231,7 +232,7 @@ class PeriodoFinancieroControllerTest {
 
     @Test
     void getResumenPartidasShouldReturnAggregatedData() throws Exception {
-        PeriodoFinancieroPartidasResumenDto resumen = new PeriodoFinancieroPartidasResumenDto(
+        PartidaPresupuestariaResumenDetalleDto ingresos = new PartidaPresupuestariaResumenDetalleDto(
                 List.of(new PartidaPresupuestariaCategoriaResumenDto(
                         1L,
                         "Salario",
@@ -240,7 +241,9 @@ class PeriodoFinancieroControllerTest {
                         new BigDecimal("1200.00"),
                         new BigDecimal("1100.00")
                 )),
-                new PartidaPresupuestariaTotalesDto(new BigDecimal("1200.00"), new BigDecimal("1100.00")),
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("1200.00"), new BigDecimal("1100.00"))
+        );
+        PartidaPresupuestariaResumenDetalleDto egresos = new PartidaPresupuestariaResumenDetalleDto(
                 List.of(new PartidaPresupuestariaCategoriaResumenDto(
                         2L,
                         "Renta",
@@ -249,8 +252,11 @@ class PeriodoFinancieroControllerTest {
                         new BigDecimal("700.00"),
                         new BigDecimal("650.00")
                 )),
-                new PartidaPresupuestariaTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00")),
-                new PartidaPresupuestariaTotalesDto(new BigDecimal("500.00"), new BigDecimal("450.00")),
+                new PartidaPresupuestariaTotalesDto(new BigDecimal("700.00"), new BigDecimal("650.00"))
+        );
+        PeriodoFinancieroPartidasResumenDto resumen = new PeriodoFinancieroPartidasResumenDto(
+                ingresos,
+                egresos,
                 new BigDecimal("500.00"),
                 new BigDecimal("450.00")
         );
@@ -259,13 +265,13 @@ class PeriodoFinancieroControllerTest {
 
         mockMvc.perform(get("/api/periodos-financieros/{id}/partidas-resumen", 9L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.ingresos", hasSize(1)))
-                .andExpect(jsonPath("$.data.ingresos[0].categoriaNombre").value("Salario"))
-                .andExpect(jsonPath("$.data.totalIngresos.montoReservado").value(1200.00))
-                .andExpect(jsonPath("$.data.egresos", hasSize(1)))
-                .andExpect(jsonPath("$.data.egresos[0].montoAplicado").value(650.00))
-                .andExpect(jsonPath("$.data.totalGeneral.montoReservado").value(500.00))
-                .andExpect(jsonPath("$.data.totalGeneral.montoAplicado").value(450.00))
+                .andExpect(jsonPath("$.data.ingresos.categorias", hasSize(1)))
+                .andExpect(jsonPath("$.data.ingresos.categorias[0].categoriaNombre").value("Salario"))
+                .andExpect(jsonPath("$.data.ingresos.totales.montoReservado").value(1200.00))
+                .andExpect(jsonPath("$.data.egresos.categorias", hasSize(1)))
+                .andExpect(jsonPath("$.data.egresos.categorias[0].montoAplicado").value(650.00))
+                .andExpect(jsonPath("$.data.egresos.totales.montoReservado").value(700.00))
+                .andExpect(jsonPath("$.data.egresos.totales.montoAplicado").value(650.00))
                 .andExpect(jsonPath("$.data.netoReservado").value(500.00))
                 .andExpect(jsonPath("$.data.netoAplicado").value(450.00));
 
