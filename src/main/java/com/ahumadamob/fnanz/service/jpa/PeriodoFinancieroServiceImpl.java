@@ -1,6 +1,7 @@
 package com.ahumadamob.fnanz.service.jpa;
 
 import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaCategoriaResumenDto;
+import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaResumenDetalleDto;
 import com.ahumadamob.fnanz.dto.response.PartidaPresupuestariaTotalesDto;
 import com.ahumadamob.fnanz.dto.response.PeriodoFinancieroPartidasResumenDto;
 import com.ahumadamob.fnanz.entity.PeriodoFinanciero;
@@ -125,8 +126,8 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
         List<PartidaPresupuestariaCategoriaResumenProjection> resumenes =
                 partidaPresupuestariaRepository.sumByPeriodoId(id);
 
-        List<PartidaPresupuestariaCategoriaResumenDto> ingresos = new ArrayList<>();
-        List<PartidaPresupuestariaCategoriaResumenDto> egresos = new ArrayList<>();
+        List<PartidaPresupuestariaCategoriaResumenDto> ingresosCategorias = new ArrayList<>();
+        List<PartidaPresupuestariaCategoriaResumenDto> egresosCategorias = new ArrayList<>();
 
         BigDecimal totalIngresosReservado = BigDecimal.ZERO;
         BigDecimal totalIngresosAplicado = BigDecimal.ZERO;
@@ -147,11 +148,11 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
             );
 
             if (resumen.getTipo() == TipoFin.INGRESO) {
-                ingresos.add(dto);
+                ingresosCategorias.add(dto);
                 totalIngresosReservado = totalIngresosReservado.add(montoReservado);
                 totalIngresosAplicado = totalIngresosAplicado.add(montoAplicado);
             } else {
-                egresos.add(dto);
+                egresosCategorias.add(dto);
                 totalEgresosReservado = totalEgresosReservado.add(montoReservado);
                 totalEgresosAplicado = totalEgresosAplicado.add(montoAplicado);
             }
@@ -162,23 +163,25 @@ public class PeriodoFinancieroServiceImpl implements PeriodoFinancieroService {
                         Comparator.nullsLast(Integer::compareTo))
                 .thenComparing(PartidaPresupuestariaCategoriaResumenDto::getCategoriaNombre,
                         String.CASE_INSENSITIVE_ORDER);
-        ingresos.sort(comparator);
-        egresos.sort(comparator);
+        ingresosCategorias.sort(comparator);
+        egresosCategorias.sort(comparator);
 
         PartidaPresupuestariaTotalesDto totalIngresos = new PartidaPresupuestariaTotalesDto(
                 totalIngresosReservado, totalIngresosAplicado);
         PartidaPresupuestariaTotalesDto totalEgresos = new PartidaPresupuestariaTotalesDto(
                 totalEgresosReservado, totalEgresosAplicado);
-        PartidaPresupuestariaTotalesDto totalGeneral = new PartidaPresupuestariaTotalesDto(
-                totalIngresosReservado.subtract(totalEgresosReservado),
-                totalIngresosAplicado.subtract(totalEgresosAplicado));
+        PartidaPresupuestariaResumenDetalleDto ingresos = new PartidaPresupuestariaResumenDetalleDto(
+                ingresosCategorias, totalIngresos);
+        PartidaPresupuestariaResumenDetalleDto egresos = new PartidaPresupuestariaResumenDetalleDto(
+                egresosCategorias, totalEgresos);
+        BigDecimal netoReservado = totalIngresosReservado.subtract(totalEgresosReservado);
+        BigDecimal netoAplicado = totalIngresosAplicado.subtract(totalEgresosAplicado);
 
         return new PeriodoFinancieroPartidasResumenDto(
                 ingresos,
-                totalIngresos,
                 egresos,
-                totalEgresos,
-                totalGeneral
+                netoReservado,
+                netoAplicado
         );
     }
 

@@ -1,6 +1,6 @@
 package com.ahumadamob.fnanz.dto.response;
 
-import java.util.List;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,14 +15,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PeriodoFinancieroPartidasResumenDto {
 
-    private List<PartidaPresupuestariaCategoriaResumenDto> ingresos;
+    private PartidaPresupuestariaResumenDetalleDto ingresos;
 
-    private PartidaPresupuestariaTotalesDto totalIngresos;
+    private PartidaPresupuestariaResumenDetalleDto egresos;
 
-    private List<PartidaPresupuestariaCategoriaResumenDto> egresos;
+    private BigDecimal netoReservado;
 
-    private PartidaPresupuestariaTotalesDto totalEgresos;
-
-    private PartidaPresupuestariaTotalesDto totalGeneral;
+    private BigDecimal netoAplicado;
 }
-
